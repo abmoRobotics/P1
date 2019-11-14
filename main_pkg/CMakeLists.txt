@@ -132,7 +132,8 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/main_pkg_node.cpp)
+add_executable(buttons src/buttons.cpp)
+add_executable(battery src/battery.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -145,9 +146,12 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(buttons
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(battery
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -156,12 +160,14 @@ include_directories(
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
-# main Executable
-add_executable(${PROJECT_NAME}_main src/main.cpp)
-set_target_properties(${PROJECT_NAME}_main PROPERTIES OUTPUT_NAME main PREFIX "")
-target_link_libraries(${PROJECT_NAME}_main
-  ${catkin_LIBRARIES}
-)
+# # main Executable
+# add_executable(${PROJECT_NAME}_main src/buttons.cpp)
+# #add_executable(buttons src/buttons.cpp)
+# set_target_properties(${PROJECT_NAME}_main PROPERTIES OUTPUT_NAME main PREFIX "")
+# target_link_libraries(${PROJECT_NAME}_main
+#   ${catkin_LIBRARIES}
+# )
+
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
