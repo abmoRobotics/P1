@@ -87,7 +87,7 @@ void point(const geometry_msgs::PointStamped::ConstPtr &msg)
 void menu()
 {
     int c;
-    std::cout << "1. create a route" << std::endl;
+    std::cout << "1. create a routee" << std::endl;
     std::cout << "2. Initiate automatic mapping" << std::endl;
     std::cout << "3. Choose task for robot" << std::endl;
     std::cin >> c;
