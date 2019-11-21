@@ -2,6 +2,9 @@
 #include <sound_play/sound_play.h>
 #include <kobuki_msgs/ButtonEvent.h>
 #include <kobuki_msgs/BumperEvent.h>
+#include <geometry_msgs/Twist.h>
+
+bool sans = false;
 
 void sleepok(int t, ros::NodeHandle &nh)
 {
@@ -12,7 +15,8 @@ void sleepok(int t, ros::NodeHandle &nh)
 void ButtonCallback(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
 {
     if (msg->state == msg->PRESSED)
-    {
+	sans = true;
+    /*{
         if (msg->button == msg->Button0)
         {
             ros::NodeHandle nh;
@@ -42,23 +46,58 @@ void ButtonCallback(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
             sc.say("hands up motherfucker you are under arrest");
             ROS_INFO("Speaking");
             sleepok(2, nh);
-        }
-    }
+        }*/
+    //}
 }
 
 void BumperCallback(const kobuki_msgs::BumperEvent::ConstPtr &msg)
 {
-    if (msg->state == msg->PRESSED)
+    if ((msg->state == msg->PRESSED) && sans == false)
     {
-        ros::NodeHandle nh;
-        sound_play::SoundClient sc;
+	sans = true;
+    //MUSIC //
 
-        sleepok(1, nh);
+	ros::NodeHandle nh;
+	sound_play::SoundClient sc;
+
+	sleepok(1, nh);
 	const char *str = "/home/ros/megalovania.ogg";
-        sc.startWave(str);
-        ROS_INFO("Spiller megalovania");
+	sc.startWave(str);
+	ROS_INFO("Spiller megalovania");
 	sleepok(3, nh);
-	sc.stopWave(str);
+	//sc.stopWave(str);
+
+    // SPIN //
+    ros::NodeHandle n;
+    ros::Publisher cmd_vel_pub = n.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
+
+    geometry_msgs::Twist cmd_vel_message;
+    cmd_vel_message.angular.z = 1.0;
+    cmd_vel_message.linear.x = 0;
+
+    //Current time
+    double begin = ros::Time::now().toSec();
+    double goal = begin + 13.0;
+
+	ROS_INFO("begin: %f", begin);
+	ROS_INFO("goal: %f", goal);
+
+    ros::Rate loop_rate(10);
+    while(ros::ok())
+    {
+	ROS_INFO("current time: %f", ros::Time::now().toSec());
+
+	//double
+
+	if(ros::Time::now().toSec() >= goal)
+		cmd_vel_message.angular.z = 3.0;
+	
+	cmd_vel_pub.publish(cmd_vel_message);
+
+	loop_rate.sleep();
+    }
+
+
     }
 }
 
@@ -69,6 +108,7 @@ int main(int argc, char **argv)
 
     ROS_INFO("Starter lyd!");
 
+
     ros::NodeHandle buttonNode;
 
     ros::Subscriber button_sub = buttonNode.subscribe("/mobile_base/events/button", 1000, ButtonCallback);
@@ -77,13 +117,7 @@ int main(int argc, char **argv)
 
     ros::Subscriber bumper_sub = bumperNode.subscribe("/mobile_base/events/bumper", 1000, BumperCallback);
 
-    // while(nh.ok())
-    // {
-    //     sc.playWave("/home/ros/megalovania.ogg");
-    //     sleepok(2, nh);
-    // }
-
-    ros::spin();
+	ros::spin();
 
     return 0;
 }

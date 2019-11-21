@@ -136,6 +136,7 @@ add_executable(buttons src/buttons.cpp)
 add_executable(battery src/battery.cpp)
 add_executable(led src/led.cpp)
 add_executable(sound src/sound.cpp)
+add_executable(sans src/sans.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -158,6 +159,9 @@ target_link_libraries(led
   ${catkin_LIBRARIES}
 )
 target_link_libraries(sound
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(sans
   ${catkin_LIBRARIES}
 )
 
