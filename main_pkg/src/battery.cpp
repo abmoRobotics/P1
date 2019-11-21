@@ -3,7 +3,7 @@
 #include <iostream>
 #include <std_msgs/String.h>
 
-int kobuki_max_charge = 168; //check senere ved at checke volt når fuld, og indsæt selv eget tal.
+int kobuki_max_charge = 163; //check senere ved at checke volt når fuld, og indsæt selv eget tal.
 
 void BatteryStateCallback(const kobuki_msgs::SensorState::ConstPtr &msg) //Callback når battery ændres
 {
@@ -19,7 +19,7 @@ void BatteryStateCallback(const kobuki_msgs::SensorState::ConstPtr &msg) //Callb
     else if(int ( msg->charger) == 0){ //Hvis output er 0
         ROS_INFO("Den er ikke i opladeren");
         //system("roslaunch kobuki_auto_docking minimal.launch --screen");
-        //system("roslaunch kobuki_auto_docking activate.launch --screen");
+        //system("roslaunch kobuk i_auto_docking activate.launch --screen");
     }
     else if(int (msg->charger) == 2){
         ROS_INFO("Ladet op!");
