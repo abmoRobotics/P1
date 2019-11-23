@@ -60,7 +60,7 @@ class Server{
             pose.pose.position.z = msg->point.z;
             pose.pose.orientation.w = 1.0;
             savedTasks.poseArray.header.stamp = ros::Time::now();
-            savedTasks.poseArray.header.frame_id = "map";
+            savedTasks.poseArray.header.frame_id = msg->header.frame_id;
             savedTasks.poseArray.poses.push_back(pose.pose);
 
             std::cout << "punkt: " << savedTasks.poseArray.poses[i] << std::endl;
@@ -72,7 +72,7 @@ class Server{
         pose_kitchen.point.y = msg->point.y;
         pose_kitchen.point.z = msg->point.z;
         pose_kitchen.header.stamp = ros::Time::now();
-        pose_kitchen.header.frame_id = "map";
+        pose_kitchen.header.frame_id = msg->header.frame_id;
     }
 
     public:
@@ -170,12 +170,15 @@ int main(int argc, char *argv[])
     
     geometry_msgs::PoseArray msg_pose;
 
-    ros::Rate loop_rate(1);
+    ros::Rate loop_rate(5);
     while (ros::ok())
-    {
-        for (size_t i = 0; i < server_instance.v_savedTasks.size(); i++)
-        {
-            std::cout << i << ". Name: " << server_instance.v_savedTasks[i].name << std::endl;
+    {   
+        if(!server_instance.v_publishedTasks.empty()){
+            std::cout << "PENDING TASKS:" << std::endl;
+            for (size_t i = 0; i < server_instance.v_publishedTasks.size(); i++)
+            {
+                std::cout << "TASK " << i+1 << ": " << server_instance.v_publishedTasks[i].name << std::endl;
+            }
         }
         
         ros::spinOnce();

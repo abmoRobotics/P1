@@ -97,6 +97,7 @@ private:
                 std::cout << "1. Create route for Turtlebot" << std::endl;
                 std::cout << "2. Send task for Turtlebot to perform" << std::endl;
                 std::cout << "3. Start automatic mapping" << std::endl;
+                std::cout << "----------------------------" << std::endl;
                 std::cout << "Select option: ";
                 std::cin >> c;
                 switch(c){
