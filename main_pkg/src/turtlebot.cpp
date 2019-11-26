@@ -8,6 +8,7 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 
+
 class Movement{
     public:
     ros::NodeHandle nh;
@@ -80,8 +81,11 @@ class MoveBase{
             pe("3");
             _send_goal(_srv_recieve_pose_array.response);
             pe("4");  
+            } else {
+            std::cout << "No jobs pending" << std::endl;
             }
-        }
+            _srv_recieve_pose_array.response.arr.poses.clear();
+        } 
     
 
     void _send_goal(main_pkg::poseArray_srv::Response pose_array){
@@ -106,10 +110,21 @@ class MoveBase{
              else{
                  std::cout << "ERROR - Current State: " << MoveBaseClient.getState().toString() << std::endl;
              }
-        }
 
+             
+        }
+        _delete_markers();
         
 
+    }
+
+    void _delete_markers(){
+        visualization_msgs::Marker marker;
+        visualization_msgs::MarkerArray marker_array;
+        marker.header.stamp = ros::Time::now();
+        marker.action = visualization_msgs::Marker::DELETEALL;
+        marker_array.markers.push_back(marker);
+        pub_marker.publish(marker_array);
     }
 
     void _send_markers(main_pkg::poseArray_srv::Response pose_array)
@@ -143,6 +158,7 @@ class MoveBase{
         }
         
         pub_marker.publish(marker_array);
+        marker_array.markers.clear();                                            
     }
 
     public:
@@ -158,7 +174,13 @@ int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "caterbot");
     MoveBase e;
-    e._recieve_pose_array();
+    ros::Rate loop_rate(1);
+    while(ros::ok){
 
+        e._recieve_pose_array();
+
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
     ros::spin();
 }

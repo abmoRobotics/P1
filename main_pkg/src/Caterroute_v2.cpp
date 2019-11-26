@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
     
     geometry_msgs::PoseArray msg_pose;
 
-    ros::Rate loop_rate(5);
+    ros::Rate loop_rate(1);
     while (ros::ok())
     {   
         if(!server_instance.v_publishedTasks.empty()){

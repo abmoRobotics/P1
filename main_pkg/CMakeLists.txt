@@ -14,6 +14,9 @@ find_package(catkin REQUIRED COMPONENTS
     turtlesim
     std_msgs
     message_generation
+    actionlib_msgs
+    move_base_msgs
+    tf
     
 )
 
@@ -71,17 +74,19 @@ poseTasks.msg
  )
 
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
+ add_action_files(
+   FILES
+   test.action
 #   Action1.action
 #   Action2.action
-# )
+ )
 
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
    DEPENDENCIES
    std_msgs
    geometry_msgs
+   actionlib_msgs
    # Or other packages containing msgs
  )
 
@@ -121,6 +126,7 @@ catkin_package(
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
   CATKIN_DEPENDS message_runtime 
+ 
   
 )
 
@@ -226,7 +232,14 @@ target_link_libraries(${PROJECT_NAME}_turtlebot
 )
 
 
-catkin_package(CATKIN_DEPENDS message_runtime)
+add_executable(${PROJECT_NAME}_action_server src/action_server.cpp)
+set_target_properties(${PROJECT_NAME}_action_server PROPERTIES OUTPUT_NAME action_server PREFIX "")
+target_link_libraries(${PROJECT_NAME}_action_server
+  ${catkin_LIBRARIES}
+)
+
+
+#catkin_package(CATKIN_DEPENDS message_runtime)
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 # install(PROGRAMS
