@@ -4,7 +4,7 @@ project(main_pkg)
 ## Compile as C++11, supported in ROS Kinetic and newer
 ## Compile as C++11, supported in ROS Kinetic and newer
 
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -12,6 +12,9 @@ project(main_pkg)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     turtlesim
+    std_msgs
+    message_generation
+    
 )
 
 ## System dependencies are found with CMake's conventions
@@ -48,18 +51,24 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
+ add_message_files(
+  FILES
 #   Message1.msg
 #   Message2.msg
-# )
+pose.msg
+poseArray.msg
+poseTasks.msg
+)
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+ add_service_files(
+  FILES
+  routeName.srv
+  serverMode.srv
+  recieve_task_name.srv
+  turtlebot_job.srv
+  poseArray_srv.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -69,10 +78,13 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+   geometry_msgs
+   # Or other packages containing msgs
+ )
+
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -108,6 +120,8 @@ catkin_package(
 #  LIBRARIES main_pkg
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime 
+  
 )
 
 ###########
@@ -129,7 +143,7 @@ include_directories(
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
@@ -159,12 +173,60 @@ include_directories(
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
 # main Executable
+
 add_executable(${PROJECT_NAME}_main src/main.cpp)
 set_target_properties(${PROJECT_NAME}_main PROPERTIES OUTPUT_NAME main PREFIX "")
 target_link_libraries(${PROJECT_NAME}_main
   ${catkin_LIBRARIES}
 )
 
+add_executable(${PROJECT_NAME}_Caterroute src/Caterroute.cpp)
+set_target_properties(${PROJECT_NAME}_Caterroute PROPERTIES OUTPUT_NAME Caterroute PREFIX "")
+target_link_libraries(${PROJECT_NAME}_Caterroute
+  ${catkin_LIBRARIES}
+)
+
+add_executable(${PROJECT_NAME}_interface src/interface.cpp)
+set_target_properties(${PROJECT_NAME}_interface PROPERTIES OUTPUT_NAME interface PREFIX "")
+target_link_libraries(${PROJECT_NAME}_interface
+  ${catkin_LIBRARIES}
+)
+
+add_executable(${PROJECT_NAME}_service_server src/service_server.cpp)
+set_target_properties(${PROJECT_NAME}_service_server PROPERTIES OUTPUT_NAME service_server PREFIX "")
+target_link_libraries(${PROJECT_NAME}_service_server
+  ${catkin_LIBRARIES}
+)
+
+add_executable(${PROJECT_NAME}_service_client src/service_client.cpp)
+set_target_properties(${PROJECT_NAME}_service_client PROPERTIES OUTPUT_NAME service_client PREFIX "")
+target_link_libraries(${PROJECT_NAME}_service_client
+  ${catkin_LIBRARIES}
+)
+
+
+### TEST
+
+add_executable(${PROJECT_NAME}_interface_v2 src/interface_v2.cpp)
+set_target_properties(${PROJECT_NAME}_interface_v2 PROPERTIES OUTPUT_NAME interface_v2 PREFIX "")
+target_link_libraries(${PROJECT_NAME}_interface_v2
+  ${catkin_LIBRARIES}
+)
+
+add_executable(${PROJECT_NAME}_Caterroute_v2 src/Caterroute_v2.cpp)
+set_target_properties(${PROJECT_NAME}_Caterroute_v2 PROPERTIES OUTPUT_NAME Caterroute_v2 PREFIX "")
+target_link_libraries(${PROJECT_NAME}_Caterroute_v2
+  ${catkin_LIBRARIES}
+)
+
+add_executable(${PROJECT_NAME}_turtlebot src/turtlebot.cpp)
+set_target_properties(${PROJECT_NAME}_turtlebot PROPERTIES OUTPUT_NAME turtlebot PREFIX "")
+target_link_libraries(${PROJECT_NAME}_turtlebot
+  ${catkin_LIBRARIES}
+)
+
+
+catkin_package(CATKIN_DEPENDS message_runtime)
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 # install(PROGRAMS
