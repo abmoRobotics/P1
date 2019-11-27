@@ -1,0 +1,34 @@
+[36m--[0m Using CATKIN_DEVEL_PREFIX: /home/anton/explore_ws/devel/.private/explore_lite
+[36m--[0m Using CMAKE_PREFIX_PATH: /opt/ros/kinetic;/home/anton/explore_ws/devel
+[36m--[0m This workspace overlays: /opt/ros/kinetic;/home/anton/explore_ws/devel
+[36m--[0m Using PYTHON_EXECUTABLE: /usr/bin/python
+[36m--[0m Using Debian Python package layout
+[36m--[0m Using empy: /usr/bin/empy
+[36m--[0m Using CATKIN_ENABLE_TESTING: ON
+[36m--[0m Call enable_testing()
+[36m--[0m Using CATKIN_TEST_RESULTS_DIR: /home/anton/explore_ws/build/explore_lite/test_results
+[36m--[0m Found gmock sources under '/usr/src/gmock': gmock will be built
+[36m--[0m Found gtest sources under '/usr/src/gmock': gtests will be built
+[36m--[0m Using Python nosetests: /usr/bin/nosetests-2.7
+[36m--[0m catkin 0.7.18
+[36m--[0m BUILD_SHARED_LIBS is on
+[36m--[0m Using these message generators: gencpp;geneus;genlisp;gennodejs;genpy
+[31m[1mCMake Error[0m at /home/anton/explore_ws/src/explore/CMakeLists.txt:56 (add_dependencies):
+  Cannot add target-level dependencies to non-existent target "meexplore".
+
+  The add_dependencies works for top-level logical targets created by the
+  add_executable, add_library, or add_custom_target commands.  If you want to
+  add file-level dependencies see the DEPENDS option of the add_custom_target
+  and add_custom_command commands.
+
+
+[31m[1mCMake Error[0m at /home/anton/explore_ws/src/explore/CMakeLists.txt:57 (target_link_libraries):
+  Cannot specify link libraries for target "meexplore" which is not built by
+  this project.
+
+
+[36m--[0m Configuring incomplete, errors occurred!
+See also "/home/anton/explore_ws/build/explore_lite/CMakeFiles/CMakeOutput.log".
+See also "/home/anton/explore_ws/build/explore_lite/CMakeFiles/CMakeError.log".
+Makefile:2020: recipe for target 'cmake_check_build_system' failed
+make: *** [cmake_check_build_system] Error 1

@@ -1,0 +1,7 @@
+[01m[K/home/anton/explore_ws/src/explore/src/meexplore.cpp:[m[K In member function ‘[01m[Kvoid dinmor::start()[m[K’:
+[01m[K/home/anton/explore_ws/src/explore/src/meexplore.cpp:8:3:[m[K [01;31m[Kerror: [m[K‘[01m[Kexplorer[m[K’ was not declared in this scope
+   explorer.start();
+[01;32m[K   ^[m[K
+make[2]: *** [CMakeFiles/explore.dir/src/meexplore.cpp.o] Error 1
+make[1]: *** [CMakeFiles/explore.dir/all] Error 2
+make: *** [all] Error 2

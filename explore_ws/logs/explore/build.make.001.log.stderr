@@ -1,0 +1,7 @@
+[01m[K/home/anton/explore_ws/src/explore/src/meexplore.cpp:[m[K In function ‘[01m[Kint main(int, char**)[m[K’:
+[01m[K/home/anton/explore_ws/src/explore/src/meexplore.cpp:9:3:[m[K [01;31m[Kerror: [m[Kexpected ‘[01m[K;[m[K’ before ‘[01m[Kros[m[K’
+   ros::init(argc, argv, "meexplore");
+[01;32m[K   ^[m[K
+make[2]: *** [CMakeFiles/explore.dir/src/meexplore.cpp.o] Error 1
+make[1]: *** [CMakeFiles/explore.dir/all] Error 2
+make: *** [all] Error 2

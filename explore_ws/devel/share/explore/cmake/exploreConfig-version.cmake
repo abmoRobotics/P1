@@ -1,0 +1,1 @@
+/home/anton/explore_ws/devel/.private/explore/share/explore/cmake/exploreConfig-version.cmake

@@ -1,0 +1,6 @@
+explore
+/home/anton/explore_ws/devel/.private/explore_lite/cmake.lock /home/anton/explore_ws/devel/./cmake.lock
+/home/anton/explore_ws/devel/.private/explore_lite/lib/explore_lite/explore /home/anton/explore_ws/devel/lib/explore_lite/explore
+/home/anton/explore_ws/devel/.private/explore_lite/lib/pkgconfig/explore_lite.pc /home/anton/explore_ws/devel/lib/pkgconfig/explore_lite.pc
+/home/anton/explore_ws/devel/.private/explore_lite/share/explore_lite/cmake/explore_liteConfig.cmake /home/anton/explore_ws/devel/share/explore_lite/cmake/explore_liteConfig.cmake
+/home/anton/explore_ws/devel/.private/explore_lite/share/explore_lite/cmake/explore_liteConfig-version.cmake /home/anton/explore_ws/devel/share/explore_lite/cmake/explore_liteConfig-version.cmake

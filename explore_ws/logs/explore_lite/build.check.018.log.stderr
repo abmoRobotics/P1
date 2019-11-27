@@ -1,0 +1,15 @@
+[31m[1mCMake Error[0m at /home/anton/explore_ws/src/explore/CMakeLists.txt:56 (add_dependencies):
+  Cannot add target-level dependencies to non-existent target "meexplore".
+
+  The add_dependencies works for top-level logical targets created by the
+  add_executable, add_library, or add_custom_target commands.  If you want to
+  add file-level dependencies see the DEPENDS option of the add_custom_target
+  and add_custom_command commands.
+
+
+[31m[1mCMake Error[0m at /home/anton/explore_ws/src/explore/CMakeLists.txt:57 (target_link_libraries):
+  Cannot specify link libraries for target "meexplore" which is not built by
+  this project.
+
+
+make: *** [cmake_check_build_system] Error 1
