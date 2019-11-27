@@ -1,8 +1,0 @@
-prefix=/home/anton/explore_ws/devel/.private/explore
-
-Name: explore
-Description: Description of explore
-Version: 2.1.1
-Cflags: 
-Libs: -L/home/anton/explore_ws/devel/.private/explore/lib 
-Requires: actionlib_msgs geometry_msgs map_msgs move_base_msgs nav_msgs std_msgs visualization_msgs

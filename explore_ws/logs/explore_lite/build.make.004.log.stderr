@@ -1,7 +1,0 @@
-CMakeFiles/explore.dir/src/meexplore.cpp.o: In function `main':
-meexplore.cpp:(.text+0x0): multiple definition of `main'
-CMakeFiles/explore.dir/src/explore.cpp.o:explore.cpp:(.text+0x28f1): first defined here
-collect2: error: ld returned 1 exit status
-make[2]: *** [/home/anton/explore_ws/devel/.private/explore_lite/lib/explore_lite/explore] Error 1
-make[1]: *** [CMakeFiles/explore.dir/all] Error 2
-make: *** [all] Error 2

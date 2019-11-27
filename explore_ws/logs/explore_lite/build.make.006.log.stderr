@@ -1,5 +1,0 @@
-[01m[K/home/anton/explore_ws/src/explore/src/meexplore.cpp:2:66:[m[K [01;31m[Kfatal error: [m[Kanton/explore_ws/src/explore/include/explore/explore.h: No such file or directory
-compilation terminated.
-make[2]: *** [CMakeFiles/explore.dir/src/meexplore.cpp.o] Error 1
-make[1]: *** [CMakeFiles/explore.dir/all] Error 2
-make: *** [all] Error 2

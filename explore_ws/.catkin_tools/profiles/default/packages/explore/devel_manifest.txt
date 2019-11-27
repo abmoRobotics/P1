@@ -1,6 +1,0 @@
-explore
-/home/anton/explore_ws/devel/.private/explore/cmake.lock /home/anton/explore_ws/devel/./cmake.lock
-/home/anton/explore_ws/devel/.private/explore/lib/explore/explore /home/anton/explore_ws/devel/lib/explore/explore
-/home/anton/explore_ws/devel/.private/explore/lib/pkgconfig/explore.pc /home/anton/explore_ws/devel/lib/pkgconfig/explore.pc
-/home/anton/explore_ws/devel/.private/explore/share/explore/cmake/exploreConfig-version.cmake /home/anton/explore_ws/devel/share/explore/cmake/exploreConfig-version.cmake
-/home/anton/explore_ws/devel/.private/explore/share/explore/cmake/exploreConfig.cmake /home/anton/explore_ws/devel/share/explore/cmake/exploreConfig.cmake
