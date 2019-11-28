@@ -179,7 +179,7 @@ include_directories(
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
 # main Executable
-
+#
 #add_executable(${PROJECT_NAME}_main src/main.cpp)
 #set_target_properties(${PROJECT_NAME}_main PROPERTIES OUTPUT_NAME main PREFIX "")
 #target_link_libraries(${PROJECT_NAME}_main
