@@ -42,7 +42,7 @@ private:
     //Services are defined
     ros::ServiceClient _client_recieve_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");
     //Subscribers
-    ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_send_task, this);
+    ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_button_event, this);
     //Service message for current job
     main_pkg::poseArray_srv _srv_recieve_pose_array;
 
@@ -75,13 +75,51 @@ public:
         else
         {
             _delete_markers();
-            std::cout << "No jobs debugnding" << std::endl;
+            std::cout << "No jobs pending" << std::endl;
         }
         
     }
 
-    void _send_task(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
+    void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg){
+        
+        if (msg->button == msg->Button0)
+        {
+            /* code */
+        } else if (msg->button == msg->Button1)
+        {
+            /* code */
+        } else if (msg->button == msg->Button2)
+        {
+            /* code */
+        }
+        
+        
+        
+    }
+
+
+
+
+    void _send_task()
     {
+        
+    switch (_navMode)
+    {
+    case navMode::operation:
+        debug("Auto");
+            for (int i = 0; i < length_job; i++){
+            _send_goal(_srv_recieve_pose_array.response);}
+        break;
+    case navMode::operation:
+        debug("operation");
+        _send_goal(_srv_recieve_pose_array.response);
+        break;
+    default:
+        break;
+    }
+
+
+
         debug("hejhejhej");
         if (_navMode == this->automatic)
         {
@@ -94,13 +132,7 @@ public:
         else if (_navMode == this->operation)
         {
             debug("operation");
-            if (!_srv_recieve_pose_array.response.arr.poses.empty())
-            {
-                /* code */
-            }
-            else
-            {
-            }
+
 
             _send_goal(_srv_recieve_pose_array.response);
         }
@@ -133,6 +165,7 @@ public:
 
         _srv_recieve_pose_array.response.arr.poses.erase(_srv_recieve_pose_array.response.arr.poses.begin());
     }
+    
 
     void _delete_markers()
     {

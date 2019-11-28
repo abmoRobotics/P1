@@ -43,7 +43,8 @@ public:
 
     //We also define a point for the kitchen
     geometry_msgs::PointStamped pose_kitchen;
-
+    
+    
 private:
     //We define the different state of the server as an enum
     enum server_state
@@ -89,6 +90,7 @@ public:
         {
         case 1: //Insert point in task
             insert_point(msg);
+            
             break;
         case 2:
             insert_kitchen(msg);
@@ -159,7 +161,10 @@ public:
     }
 
 public:
-    Server() {}
+    Server() {
+
+        
+    }
 };
 
 int main(int argc, char *argv[])
@@ -177,11 +182,14 @@ int main(int argc, char *argv[])
     ros::ServiceServer server4 = nh.advertiseService("recieve_task_name", &Server::send_task_name, &server_instance);
     ros::ServiceServer server5 = nh.advertiseService("turtlebot_job", &Server::turtlebot_job, &server_instance);
     ros::ServiceServer server6 = nh.advertiseService("get_job", &Server::get_job, &server_instance);
+   
+
     //Publisher
 
     geometry_msgs::PoseArray msg_pose;
 
     ros::Rate loop_rate(1);
+
     while (ros::ok())
     {
         if (!server_instance.v_publishedTasks.empty())
