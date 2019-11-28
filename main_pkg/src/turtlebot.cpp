@@ -36,7 +36,7 @@ void debug(std::string a)
         debug,
         operate,
     };
-    mode mode = operate;
+    mode mode = debug;
 
     if (mode == debug)
     {
@@ -64,7 +64,7 @@ private:
     
     ros::ServiceClient _client_recieve_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");
     //Subscribers
-
+    ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_send_task, this);
     //Service message for current job
     main_pkg::poseArray_srv _srv_recieve_pose_array;
 
@@ -84,6 +84,7 @@ public:
     {
         debug("1");
         _client_recieve_pose_array.call(_srv_recieve_pose_array);
+        
         debug("2");
         if (!_srv_recieve_pose_array.response.arr.poses.empty())
         {
@@ -98,14 +99,15 @@ public:
             _delete_markers();
             std::cout << "No jobs debugnding" << std::endl;
         }
-        _srv_recieve_pose_array.response.arr.poses.clear();
+        
     }
 
     void _send_task(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
     {
-
+        debug("hejhejhej");
         if (_navMode == this->automatic)
         {
+            debug("Auto");
             for (int i = 0; i < length_job; i++)
             {
                 _send_goal(_srv_recieve_pose_array.response);
@@ -113,6 +115,7 @@ public:
         }
         else if (_navMode == this->operation)
         {
+            debug("operation");
             if (!_srv_recieve_pose_array.response.arr.poses.empty())
             {
                 /* code */
@@ -201,7 +204,7 @@ public:
 public:
     MoveBase() : MoveBaseClient("move_base", true)
     {
-        ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 10, &MoveBase::_send_task, this);
+        
     }
 };
 
@@ -215,6 +218,7 @@ int main(int argc, char *argv[])
     {
         if (e.job_size() == 0)
         {
+            std::cout << "kikik" << std::endl;
             e._recieve_pose_array();
         }
 
