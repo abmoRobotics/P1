@@ -7,6 +7,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <kobuki_msgs/ButtonEvent.h>
 
 class Movement
 {
@@ -46,19 +47,24 @@ void debug(std::string a)
 class MoveBase
 {
 private:
+
     enum navMode
     {
         automatic,
         operation
-    } navMode = automatic;
+    };
+    navMode _navMode = automatic;
+    
     //nodeHandle defined
     ros::NodeHandle nh;
+    
     //Actions are defined
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
     //Services are defined
+    
     ros::ServiceClient _client_recieve_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");
     //Subscribers
-    
+
     //Service message for current job
     main_pkg::poseArray_srv _srv_recieve_pose_array;
 
@@ -95,17 +101,17 @@ public:
         _srv_recieve_pose_array.response.arr.poses.clear();
     }
 
-    void _send_task(int mode)
+    void _send_task(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
     {
 
-        if (navMode == MoveBase::navMode::automatic)
+        if (_navMode == this->automatic)
         {
             for (int i = 0; i < length_job; i++)
             {
                 _send_goal(_srv_recieve_pose_array.response);
             }
         }
-        else if (mode == MoveBase::navMode::operation)
+        else if (_navMode == this->operation)
         {
             if (!_srv_recieve_pose_array.response.arr.poses.empty())
             {
