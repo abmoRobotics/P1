@@ -8,6 +8,8 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <kobuki_msgs/ButtonEvent.h>
+#include <kobuki_msgs/SensorState.h>
+//#include <rate.h>
 
 void debug(std::string a)
 {
@@ -40,36 +42,44 @@ private:
     //Actions are defined
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
     //Services are defined
-    ros::ServiceClient _client_recieve_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");
+    ros::ServiceClient _client_receive_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");
+    ros::ServiceClient _client_receive_pose_kitchen = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_kitchen");
     //Subscribers
-    ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_send_task, this);
+    ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_send_task,
+ this);
+    ros::Subscriber batterySub = nh.subscribe("/mobile_base/sensors/core", 1, &MoveBase::batteryCallback, this);
     //Service message for current job
-    main_pkg::poseArray_srv _srv_recieve_pose_array;
+    main_pkg::poseArray_srv _srv_receive_pose_array;
+    main_pkg::pointStamped_srv _srv_receive_pose_kitchen;
 
     //Publisher for markers
     ros::Publisher pub_marker = nh.advertise<visualization_msgs::MarkerArray>(
         "route_markers", 1);
     //Variables
     int length_job = 0;
+    int minimum_battery_pct = 95; //Battery % when it returns to dock
+    int kobuki_max_charge = 163; //Battery volt at full charge
+    int current_battery = kobuki_max_charge; //Current battery in volt
+    int current_dock_state = 2;
 
 public:
     int job_size()
     {
-        return _srv_recieve_pose_array.response.arr.poses.size();
+        return _srv_receive_pose_array.response.arr.poses.size();
     }
 
-    void _recieve_pose_array()
+    void _receive_pose_array()
     {
         debug("1");
-        _client_recieve_pose_array.call(_srv_recieve_pose_array);
+        _client_receive_pose_array.call(_srv_receive_pose_array);
         
         debug("2");
-        if (!_srv_recieve_pose_array.response.arr.poses.empty())
+        if (!_srv_receive_pose_array.response.arr.poses.empty())
         {
-            length_job = _srv_recieve_pose_array.response.arr.poses.size();
-            _send_markers(_srv_recieve_pose_array.response);
+            length_job = _srv_receive_pose_array.response.arr.poses.size();
+            _send_markers(_srv_receive_pose_array.response);
             debug("3");
-            //_send_goal(_srv_recieve_pose_array.response);
+            //_send_goal(_srv_receive_pose_array.response);
             debug("4");
         }
         else
@@ -80,6 +90,7 @@ public:
         
     }
 
+   //Button callback
     void _send_task(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
     {
         debug("hejhejhej");
@@ -88,13 +99,13 @@ public:
             debug("Auto");
             for (int i = 0; i < length_job; i++)
             {
-                _send_goal(_srv_recieve_pose_array.response);
+                _send_goal(_srv_receive_pose_array.response);
             }
         }
         else if (_navMode == this->operation)
         {
             debug("operation");
-            if (!_srv_recieve_pose_array.response.arr.poses.empty())
+            if (!_srv_receive_pose_array.response.arr.poses.empty())
             {
                 /* code */
             }
@@ -102,9 +113,9 @@ public:
             {
             }
 
-            _send_goal(_srv_recieve_pose_array.response);
+            _send_goal(_srv_receive_pose_array.response);
         }
-    }
+    }  
 
     int _send_goal(main_pkg::poseArray_srv::Response pose_array)
     {
@@ -131,8 +142,9 @@ public:
             std::cout << "ERROR - Current State: " << MoveBaseClient.getState().toString() << std::endl;
         }
 
-        _srv_recieve_pose_array.response.arr.poses.erase(_srv_recieve_pose_array.response.arr.poses.begin());
+        _srv_receive_pose_array.response.arr.poses.erase(_srv_receive_pose_array.response.arr.poses.begin());
     }
+
 
     void _delete_markers()
     {
@@ -178,6 +190,36 @@ public:
         pub_marker.publish(marker_array);
         marker_array.markers.clear();
     }
+    //Battery callback
+    void batteryCallback(const kobuki_msgs::SensorState::ConstPtr &msg)
+    {
+        //Store variables for batterycheck()
+        current_battery = msg->battery;
+        current_dock_state = msg->charger;
+    }
+
+    bool battery_check() //Returns true if it needs to recharge
+    {
+
+        float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate prct
+            
+        if(int (current_dock_state) == 0 && batterypct < minimum_battery_pct){ //Not in dock and under 
+            debug("battery time, mums ( ͡° ͜ʖ ͡°)");
+
+ 	    _client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
+
+	    //_srv_receive_pose_kitchen.response.pose
+	    
+            //Kør til punkt foran dock
+            //Start autodock 
+
+
+            //system("roslaunch kobuki_auto_docking minimal.launch --screen");
+            //system("roslaunch kobuk i_auto_docking activate.launch --screen");
+            return true;
+        }	
+        return false;
+    }
 
 public:
     MoveBase() : MoveBaseClient("move_base", true)
@@ -196,8 +238,10 @@ int main(int argc, char *argv[])
     {
         if (e.job_size() == 0)
         {
-            std::cout << "kikik" << std::endl;
-            e._recieve_pose_array();
+	        if(!e.battery_check()){ //If it doesn't require recharging
+                std::cout << "kikik" << std::endl;
+                e._receive_pose_array();
+            }
         }
 
         ros::spinOnce();

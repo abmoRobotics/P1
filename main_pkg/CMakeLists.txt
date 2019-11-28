@@ -71,6 +71,7 @@ poseTasks.msg
   recieve_task_name.srv
   turtlebot_job.srv
   poseArray_srv.srv
+  pointStamped_srv.srv
  )
 
 ## Generate actions in the 'action' folder
@@ -198,7 +199,6 @@ target_link_libraries(depth
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
-<<<<<<< HEAD
 # main Executable
 #
 #add_executable(${PROJECT_NAME}_main src/main.cpp)
@@ -218,7 +218,7 @@ set_target_properties(${PROJECT_NAME}_interface PROPERTIES OUTPUT_NAME interface
 target_link_libraries(${PROJECT_NAME}_interface
   ${catkin_LIBRARIES}
 )
-=======
+
 # # main Executable
 # add_executable(${PROJECT_NAME}_main src/buttons.cpp)
 # #add_executable(buttons src/buttons.cpp)
@@ -227,7 +227,7 @@ target_link_libraries(${PROJECT_NAME}_interface
 #   ${catkin_LIBRARIES}
 # )
 
->>>>>>> development
+
 
 #add_executable(${PROJECT_NAME}_service_server src/service_server.cpp)
 #set_target_properties(${PROJECT_NAME}_service_server PROPERTIES OUTPUT_NAME service_server PREFIX "")

@@ -12,6 +12,7 @@
 #include <vector>
 #include <main_pkg/poseArray.h>
 #include <main_pkg/poseTasks.h>
+#include <main_pkg/pointStamped_srv.h>
 #include <main_pkg/serverMode.h>
 #include <main_pkg/routeName.h>
 #include <main_pkg/recieve_task_name.h>
@@ -158,6 +159,20 @@ public:
         }
     }
 
+    bool get_pose_kitchen(main_pkg::pointStamped_srv::Request &req,
+                 main_pkg::pointStamped_srv::Response &res)
+    {
+	//Check if pose_kitchen has been set
+        if(pose_kitchen.point.x != 0 && pose_kitchen.point.y != 0 && pose_kitchen.point.z != 0){
+	    ROS_INFO("Kitchen point found!");	
+	    res.pose = pose_kitchen;
+        }
+	else{		
+	    ROS_INFO("There is no point set for the kitchen");		
+	}
+
+    }
+
 public:
     Server() {}
 };
@@ -177,6 +192,7 @@ int main(int argc, char *argv[])
     ros::ServiceServer server4 = nh.advertiseService("recieve_task_name", &Server::send_task_name, &server_instance);
     ros::ServiceServer server5 = nh.advertiseService("turtlebot_job", &Server::turtlebot_job, &server_instance);
     ros::ServiceServer server6 = nh.advertiseService("get_job", &Server::get_job, &server_instance);
+    ros::ServiceServer server7 = nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, &server_instance);
     //Publisher
 
     geometry_msgs::PoseArray msg_pose;
