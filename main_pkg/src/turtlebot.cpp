@@ -9,26 +9,6 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <kobuki_msgs/ButtonEvent.h>
 
-class Movement
-{
-public:
-    ros::NodeHandle nh;
-    ros::ServiceClient client = nh.serviceClient<main_pkg::poseArray_srv>("get_job");
-
-    geometry_msgs::PoseArray goal;
-
-    bool _request_job()
-    {
-        main_pkg::poseArray_srv srv;
-        client.call(srv);
-        goal = srv.response.arr;
-        for (int i = 0; i < srv.response.arr.poses.size(); i++)
-        {
-            std::cout << srv.response.arr.poses[i].position << std::endl;
-        }
-    }
-};
-
 void debug(std::string a)
 {
     enum mode
@@ -57,11 +37,9 @@ private:
     
     //nodeHandle defined
     ros::NodeHandle nh;
-    
     //Actions are defined
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
     //Services are defined
-    
     ros::ServiceClient _client_recieve_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");
     //Subscribers
     ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_send_task, this);
