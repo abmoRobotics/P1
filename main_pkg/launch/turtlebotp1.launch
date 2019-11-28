@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<launch>
+  <node name="turtlebot" pkg="main_pkg" type="turtlebot" output="screen" />
+  <include file="$(find turtlebot_bringup)/launch/minimal.launch" />
+  <include file="$(find turtlebot_navigation)/launch/includes/move_base.launch.xml" />
+  <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(find busroute)/config/busrouting.rviz"/>
+   
+</launch>
+
+
+
