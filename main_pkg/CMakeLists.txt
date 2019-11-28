@@ -180,17 +180,17 @@ include_directories(
 
 # main Executable
 
-add_executable(${PROJECT_NAME}_main src/main.cpp)
-set_target_properties(${PROJECT_NAME}_main PROPERTIES OUTPUT_NAME main PREFIX "")
-target_link_libraries(${PROJECT_NAME}_main
-  ${catkin_LIBRARIES}
-)
+#add_executable(${PROJECT_NAME}_main src/main.cpp)
+#set_target_properties(${PROJECT_NAME}_main PROPERTIES OUTPUT_NAME main PREFIX "")
+#target_link_libraries(${PROJECT_NAME}_main
+#  ${catkin_LIBRARIES}
+#)
 
-add_executable(${PROJECT_NAME}_Caterroute src/Caterroute.cpp)
-set_target_properties(${PROJECT_NAME}_Caterroute PROPERTIES OUTPUT_NAME Caterroute PREFIX "")
-target_link_libraries(${PROJECT_NAME}_Caterroute
-  ${catkin_LIBRARIES}
-)
+#add_executable(${PROJECT_NAME}_Caterroute src/Caterroute.cpp)
+#set_target_properties(${PROJECT_NAME}_Caterroute PROPERTIES OUTPUT_NAME Caterroute PREFIX "")
+#target_link_libraries(${PROJECT_NAME}_Caterroute
+#  ${catkin_LIBRARIES}
+#)
 
 add_executable(${PROJECT_NAME}_interface src/interface.cpp)
 set_target_properties(${PROJECT_NAME}_interface PROPERTIES OUTPUT_NAME interface PREFIX "")
@@ -198,30 +198,30 @@ target_link_libraries(${PROJECT_NAME}_interface
   ${catkin_LIBRARIES}
 )
 
-add_executable(${PROJECT_NAME}_service_server src/service_server.cpp)
-set_target_properties(${PROJECT_NAME}_service_server PROPERTIES OUTPUT_NAME service_server PREFIX "")
-target_link_libraries(${PROJECT_NAME}_service_server
-  ${catkin_LIBRARIES}
-)
+#add_executable(${PROJECT_NAME}_service_server src/service_server.cpp)
+#set_target_properties(${PROJECT_NAME}_service_server PROPERTIES OUTPUT_NAME service_server PREFIX "")
+#target_link_libraries(${PROJECT_NAME}_service_server
+#  ${catkin_LIBRARIES}
+#)
 
-add_executable(${PROJECT_NAME}_service_client src/service_client.cpp)
-set_target_properties(${PROJECT_NAME}_service_client PROPERTIES OUTPUT_NAME service_client PREFIX "")
-target_link_libraries(${PROJECT_NAME}_service_client
-  ${catkin_LIBRARIES}
-)
+#add_executable(${PROJECT_NAME}_service_client src/service_client.cpp)
+#set_target_properties(${PROJECT_NAME}_service_client PROPERTIES OUTPUT_NAME service_client PREFIX "")
+#target_link_libraries(${PROJECT_NAME}_service_client
+#  ${catkin_LIBRARIES}
+#)
 
 
 ### TEST
 
-add_executable(${PROJECT_NAME}_interface_v2 src/interface_v2.cpp)
-set_target_properties(${PROJECT_NAME}_interface_v2 PROPERTIES OUTPUT_NAME interface_v2 PREFIX "")
-target_link_libraries(${PROJECT_NAME}_interface_v2
-  ${catkin_LIBRARIES}
-)
+#add_executable(${PROJECT_NAME}_interface_v2 src/interface_v2.cpp)
+#set_target_properties(${PROJECT_NAME}_interface_v2 PROPERTIES OUTPUT_NAME interface_v2 PREFIX "")
+#target_link_libraries(${PROJECT_NAME}_interface_v2
+#  ${catkin_LIBRARIES}
+#)
 
-add_executable(${PROJECT_NAME}_Caterroute_v2 src/Caterroute_v2.cpp)
-set_target_properties(${PROJECT_NAME}_Caterroute_v2 PROPERTIES OUTPUT_NAME Caterroute_v2 PREFIX "")
-target_link_libraries(${PROJECT_NAME}_Caterroute_v2
+add_executable(${PROJECT_NAME}_server src/server.cpp)
+set_target_properties(${PROJECT_NAME}_server PROPERTIES OUTPUT_NAME server PREFIX "")
+target_link_libraries(${PROJECT_NAME}_server
   ${catkin_LIBRARIES}
 )
 
@@ -232,11 +232,11 @@ target_link_libraries(${PROJECT_NAME}_turtlebot
 )
 
 
-add_executable(${PROJECT_NAME}_action_server src/action_server.cpp)
-set_target_properties(${PROJECT_NAME}_action_server PROPERTIES OUTPUT_NAME action_server PREFIX "")
-target_link_libraries(${PROJECT_NAME}_action_server
-  ${catkin_LIBRARIES}
-)
+#add_executable(${PROJECT_NAME}_action_server src/action_server.cpp)
+#set_target_properties(${PROJECT_NAME}_action_server PROPERTIES OUTPUT_NAME action_server PREFIX "")
+#target_link_libraries(${PROJECT_NAME}_action_server
+#  ${catkin_LIBRARIES}
+#)
 
 
 #catkin_package(CATKIN_DEPENDS message_runtime)
