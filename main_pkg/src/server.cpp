@@ -117,7 +117,8 @@ private:
 
         if ((dir = opendir(fn)) != NULL){
             while ((entry = readdir(dir)) != NULL) {
-                if (entry->d_name[1]== 'g'&& entry->d_name[2]== 'h' && !canAdd){
+                std::string s = entry->d_name;
+                if (s.find("mymap") != std::string::npos && !canAdd){
                     strncpy(sti,fn,1025);
                     traverse(fn, true);
                     return;
