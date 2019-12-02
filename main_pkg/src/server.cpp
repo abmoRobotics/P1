@@ -257,14 +257,14 @@ public:
 public:
     Server() {
     
-    ros::ServiceServer server = _nh.advertiseService("add_task", &Server::add_task, this);
-    ros::ServiceServer server2 = _nh.advertiseService("stop_task", &Server::stop_task, this);
-    ros::ServiceServer server3 = _nh.advertiseService("server_mode", &Server::change_server_mode, this);
-    ros::ServiceServer server4 = _nh.advertiseService("recieve_task_name", &Server::send_task_name, this);
-    ros::ServiceServer server5 = _nh.advertiseService("turtlebot_job", &Server::turtlebot_job, this);
-    ros::ServiceServer server6 = _nh.advertiseService("get_job", &Server::get_job, this);
-    ros::ServiceServer server7 = _nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, this);
-    ros::ServiceServer server8 = _nh.advertiseService("get_pose_charging", &Server::get_pose_charging, this);
+    ros::ServiceServer server   = _nh.advertiseService("add_task", &Server::add_task, this);
+    ros::ServiceServer server2  = _nh.advertiseService("stop_task", &Server::stop_task, this);
+    ros::ServiceServer server3  = _nh.advertiseService("server_mode", &Server::change_server_mode, this);
+    ros::ServiceServer server4  = _nh.advertiseService("recieve_task_name", &Server::send_task_name, this);
+    ros::ServiceServer server5  = _nh.advertiseService("turtlebot_job", &Server::turtlebot_job, this);
+    ros::ServiceServer server6  = _nh.advertiseService("get_job", &Server::get_job, this);
+    ros::ServiceServer server7  = _nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, this);
+    ros::ServiceServer server8  = _nh.advertiseService("get_pose_charging", &Server::get_pose_charging, this);
     ros::ServiceServer server10 = _nh.advertiseService("show_maps", &Server::display_maps, this);
     //subsribers
     ros::Subscriber click_sub = _nh.subscribe("clicked_point", 100, &Server::recieve_points, this);
