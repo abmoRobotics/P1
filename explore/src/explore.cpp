@@ -36,7 +36,6 @@
  *********************************************************************/
 
 #include <explore/explore.h>
-#include <std_srvs/Empty.h>
 
 #include <thread>
 
