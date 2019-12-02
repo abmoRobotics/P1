@@ -52,8 +52,7 @@ private:
         srv_add_task.request.name = nameTask;
         client_add_task.call(srv_add_task);
         //Function for changing server mode to allow for inserting points.
-        srv_server_mode.request.mode = (int)taskCoordinates;
-        client_server_mode.call(srv_server_mode);
+        _server_mode(taskCoordinates);
 
         while (selection != 1)
         {
@@ -66,8 +65,7 @@ private:
         //Function for incremeting vector
         client_stop_task.call(srv_stop_task);
         //Changing server_mode to 0
-        srv_server_mode.request.mode = (int)inactivate;
-        client_server_mode.call(srv_server_mode);
+        _server_mode(inactivate);
     };
 
     void _automaticMapping()
@@ -102,8 +100,47 @@ private:
         client_turtlebot_job.call(srv_server_mode);
     }
 
+    void _kitchenPoint(){
+        char c;
+        _clearScreen();
+        _server_mode(kitchenPos);
+        std::cout << "Insert kitchen point" << std::endl;
+        std::cin >> c; 
 
+        _server_mode(inactivate);
+    }
 
+    void _chargingPoint(){
+        char c;
+        _clearScreen();
+        _server_mode(chargingPos);
+        std::cout << "Insert charging point" << std::endl;
+        std::cin >> c; 
+
+        _server_mode(inactivate);
+
+    }
+    void _server_mode(server_state s){
+        switch (s)
+        {
+        case inactivate:
+            srv_server_mode.request.mode = (int)inactivate;
+            break;
+        case taskCoordinates:
+            srv_server_mode.request.mode = (int)taskCoordinates;
+            break;
+        case kitchenPos:
+             srv_server_mode.request.mode = (int)kitchenPos;   
+            break;
+        case chargingPos:
+            srv_server_mode.request.mode = (int)chargingPos;
+            break;
+        default:
+            srv_server_mode.request.mode = (int)inactivate;
+            break;
+        }
+        client_server_mode.call(srv_server_mode);
+    }
     void _menu()
     {
         int c = 1;
@@ -120,9 +157,12 @@ private:
             std::cout << "----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
-            while (1 < c > 5)
+            while (1 > c > 5)
             {
-                switch (c){
+                std::cin >> c;
+            }
+
+            switch (c){
                 case 1:
                     _createMenu();
                     break;
@@ -133,17 +173,17 @@ private:
                     _automaticMapping();
                     break;
                 case 4:
-                    _insert_kit();
+                    _kitchenPoint();
                     break;
                 case 5:
-                    _automaticMapping();
+                    _chargingPoint();
                     break;
 
                 default:
                     std::cout << "error" << std::endl;
                     break;
                 }
-            }
+            
             
             
         }
@@ -152,7 +192,9 @@ private:
 public:
     Menu()
     {
+        std::cout << 4 << std::endl;
         _menu();
+        std::cout << 5 << std::endl;
     }
     ~Menu() {}
 };
@@ -160,7 +202,6 @@ public:
 int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "interface");
-    ros::NodeHandle nh;
     Menu e;
     //menu();
 }
