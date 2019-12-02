@@ -244,6 +244,7 @@ public:
     bool display_maps(std_srvs::Empty::Request &req,
                    std_srvs::Empty::Response &res)
     {
+        ROS_INFO_STREAM("server displaying maps..");
         traverse("/home", false);
 
         printf("%s\n\n", sti);
