@@ -5,7 +5,9 @@
   <include file="$(find turtlebot_bringup)/launch/minimal.launch" />
   <include file="$(find turtlebot_navigation)/launch/includes/move_base.launch.xml" />
   <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(find busroute)/config/busrouting.rviz"/>
-   
+
+  <include file="$(find kobuki_auto_docking)/launch/minimal.launch" />
+
 </launch>
 
 
