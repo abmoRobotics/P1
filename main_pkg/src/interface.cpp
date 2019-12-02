@@ -184,6 +184,8 @@ private:
             std::cout << "3. Start automatic mapping" << std::endl;
             std::cout << "4. Insert kitchen point" << std::endl;
             std::cout << "5. Insert charging station point" << std::endl;
+            std::cout << "6. Save map" << std::endl;
+            std::cout << "7. Load map" << std::endl;
             std::cout << "----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
@@ -207,6 +209,12 @@ private:
                     break;
                 case 5:
                     _chargingPoint();
+                    break;
+                case 6:
+                    _saveMap();
+                    break;
+                case 7:
+                    _showMaps();
                     break;
 
                 default:

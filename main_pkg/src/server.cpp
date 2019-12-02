@@ -244,7 +244,7 @@ public:
     bool display_maps(std_srvs::Empty::Request &req,
                    std_srvs::Empty::Response &res)
     {
-        ROS_INFO_STREAM("server displaying maps..");
+        ROS_INFO_STREAM("Server displaying maps..");
         traverse("/home", false);
 
         printf("%s\n\n", sti);
@@ -264,7 +264,7 @@ public:
     ros::ServiceServer server6 = _nh.advertiseService("get_job", &Server::get_job, this);
     ros::ServiceServer server7 = _nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, this);
     ros::ServiceServer server8 = _nh.advertiseService("get_pose_charging", &Server::get_pose_charging, this);
-    ros::ServiceServer server9 = _nh.advertiseService("show_maps", &Server::display_maps, this);
+    ros::ServiceServer server10 = _nh.advertiseService("show_maps", &Server::display_maps, this);
     //subsribers
     ros::Subscriber click_sub = _nh.subscribe("clicked_point", 100, &Server::recieve_points, this);
     }
