@@ -47,7 +47,7 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
-
+#include <std_srvs/SetBool.h>
 #include <explore/costmap_client.h>
 #include <explore/frontier_search.h>
 
@@ -66,6 +66,7 @@ public:
 
   void start();
   void stop();
+  bool toggle(std_srvs::SetBool::Request&, std_srvs::SetBool::Response&);
 
 private:
   /**

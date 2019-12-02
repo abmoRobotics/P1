@@ -18,11 +18,15 @@ private:
     ros::ServiceClient client_stop_task = _nh.serviceClient<std_srvs::Empty>("stop_task");
     ros::ServiceClient client_recieve_task_name = _nh.serviceClient<main_pkg::recieve_task_name>("recieve_task_name");
     ros::ServiceClient client_turtlebot_job = _nh.serviceClient<main_pkg::serverMode>("turtlebot_job");
+    ros::ServiceClient client_toggle_explore = _nh.serviceClient<std_srvs::SetBool>("toggle_explore");
+    ros::ServiceClient client_show_maps = _nh.serviceClient<std_srvs::SetBool>("show_maps");
 
     //srv messages
     main_pkg::routeName srv_add_task;
     main_pkg::serverMode srv_server_mode;
     std_srvs::Empty srv_stop_task;
+    std_srvs::Empty srv_show_maps;
+    std_srvs::SetBool srv_toggle_explore;
     main_pkg::recieve_task_name srv_recieve_task_name;
 
 public:
@@ -75,9 +79,33 @@ private:
         char c;
         _clearScreen();
         //service start automatic mapping
+        srv_toggle_explore.request.data = true;
+        client_toggle_explore.call(srv_toggle_explore);
         std::cout << "Automatic mapping started" << std::endl;
         std::cout << "Press any key to return: ";
         std::cin >> c;
+        srv_toggle_explore.request.data = false;
+        client_toggle_explore.call(srv_toggle_explore);
+    }
+
+    void _saveMap(){
+        cout << "Enter name for new map: ";
+        string s;
+        cin >> s;
+        s = "rosrun map_server map_saver -f "+s;
+        system(s);
+    }
+
+    void _showMaps()
+    {
+        cout << "Displaying list of maps. Enter the map number to load." << endl;
+        client_show_maps.call(srv_show_maps);
+        u_int mapNumber;
+        cin >> mapNumber;
+        string s = "rosrun map_server map_server ";
+        s += ops[mapNumber];
+        system(s);
+        
     }
 
     void _sendTask()
