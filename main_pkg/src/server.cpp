@@ -12,12 +12,21 @@
 #include <vector>
 #include <main_pkg/poseArray.h>
 #include <main_pkg/poseTasks.h>
+#include <main_pkg/pointStamped_srv.h>
 #include <main_pkg/serverMode.h>
 #include <main_pkg/routeName.h>
 #include <main_pkg/recieve_task_name.h>
 #include <main_pkg/poseArray_srv.h>
 #include <string.h>
 #include <std_srvs/Empty.h>
+
+
+
+class Services{
+
+};
+
+
 
 class Server
 {
@@ -34,7 +43,6 @@ public:
 
     //Two instances of store_task is defined
     store_task savedTasks;     //for saving the different tasks
-    store_task publishedTasks; //For publishing the tasks for the robot to perform.
 
     //Each of these instances of store_task needs to be stored within a vector.
 public:
@@ -46,6 +54,7 @@ public:
     
     
 private:
+    ros::NodeHandle _nh;
     //We define the different state of the server as an enum
     enum server_state
     {
@@ -57,7 +66,6 @@ private:
         //2 = points are stored to the kitchen position
     };
     int server_mode = 0;
-
 
     void insert_point(const geometry_msgs::PointStamped::ConstPtr msg)
     {
@@ -160,36 +168,40 @@ public:
         }
     }
 
+    bool get_pose_kitchen(main_pkg::pointStamped_srv::Request &req,
+                 main_pkg::pointStamped_srv::Response &res){
+	//Check if pose_kitchen has been set
+        if(pose_kitchen.point.x != 0 && pose_kitchen.point.y != 0 && pose_kitchen.point.z != 0){
+	    ROS_INFO("Kitchen point found!");	
+	    res.pose = pose_kitchen;
+        }
+	else{		
+	    ROS_INFO("There is no point set for the kitchen");		
+	}
+
+    }
+
 public:
     Server() {
-
-        
+    
+    ros::ServiceServer server = _nh.advertiseService("add_task", &Server::add_task, this);
+    ros::ServiceServer server2 = _nh.advertiseService("stop_task", &Server::stop_task, this);
+    ros::ServiceServer server3 = _nh.advertiseService("server_mode", &Server::change_server_mode, this);
+    ros::ServiceServer server4 = _nh.advertiseService("recieve_task_name", &Server::send_task_name, this);
+    ros::ServiceServer server5 = _nh.advertiseService("turtlebot_job", &Server::turtlebot_job, this);
+    ros::ServiceServer server6 = _nh.advertiseService("get_job", &Server::get_job, this);
+    //subsribers
+    ros::Subscriber click_sub = _nh.subscribe("clicked_point", 100, &Server::recieve_points, this);
     }
 };
 
 int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "Caterroute");
-    ros::NodeHandle nh;
-
     Server server_instance;
-    //Subscribers
-    ros::Subscriber click_sub = nh.subscribe("clicked_point", 100, &Server::recieve_points, &server_instance);
-    //service servers
-    ros::ServiceServer server = nh.advertiseService("add_task", &Server::add_task, &server_instance);
-    ros::ServiceServer server2 = nh.advertiseService("stop_task", &Server::stop_task, &server_instance);
-    ros::ServiceServer server3 = nh.advertiseService("server_mode", &Server::change_server_mode, &server_instance);
-    ros::ServiceServer server4 = nh.advertiseService("recieve_task_name", &Server::send_task_name, &server_instance);
-    ros::ServiceServer server5 = nh.advertiseService("turtlebot_job", &Server::turtlebot_job, &server_instance);
-    ros::ServiceServer server6 = nh.advertiseService("get_job", &Server::get_job, &server_instance);
-   
 
-    //Publisher
-
-    geometry_msgs::PoseArray msg_pose;
 
     ros::Rate loop_rate(1);
-
     while (ros::ok())
     {
         if (!server_instance.v_publishedTasks.empty())
@@ -207,3 +219,4 @@ int main(int argc, char *argv[])
 
     ros::spin();
 }
+

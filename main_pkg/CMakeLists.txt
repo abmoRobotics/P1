@@ -71,6 +71,7 @@ poseTasks.msg
   recieve_task_name.srv
   turtlebot_job.srv
   poseArray_srv.srv
+  pointStamped_srv.srv
  )
 
 ## Generate actions in the 'action' folder
@@ -153,7 +154,12 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/main_pkg_node.cpp)
+add_executable(buttons src/buttons.cpp)
+add_executable(battery src/battery.cpp)
+add_executable(led src/led.cpp)
+add_executable(sound src/sound.cpp)
+add_executable(sans src/sans.cpp)
+add_executable(depth src/depth.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -166,9 +172,25 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(buttons
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(battery
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(led
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(sound
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(sans
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(depth
+  ${catkin_LIBRARIES}
+)
+
 
 #############
 ## Install ##
@@ -196,6 +218,16 @@ set_target_properties(${PROJECT_NAME}_interface PROPERTIES OUTPUT_NAME interface
 target_link_libraries(${PROJECT_NAME}_interface
   ${catkin_LIBRARIES}
 )
+
+# # main Executable
+# add_executable(${PROJECT_NAME}_main src/buttons.cpp)
+# #add_executable(buttons src/buttons.cpp)
+# set_target_properties(${PROJECT_NAME}_main PROPERTIES OUTPUT_NAME main PREFIX "")
+# target_link_libraries(${PROJECT_NAME}_main
+#   ${catkin_LIBRARIES}
+# )
+
+
 
 #add_executable(${PROJECT_NAME}_service_server src/service_server.cpp)
 #set_target_properties(${PROJECT_NAME}_service_server PROPERTIES OUTPUT_NAME service_server PREFIX "")
