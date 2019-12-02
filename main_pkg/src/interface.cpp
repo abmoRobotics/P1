@@ -5,6 +5,7 @@
 #include <main_pkg/recieve_task_name.h>
 #include <string>
 #include <vector>
+#include <std_srvs/SetBool.h>
 #include <std_srvs/Empty.h>
 
 class Menu
@@ -87,22 +88,23 @@ private:
     }
 
     void _saveMap(){
-        cout << "Enter name for new map: ";
-        string s;
-        cin >> s;
+        std::cout << "Enter name for new map: ";
+        std::string s;
+        std::cin >> s;
         s = "rosrun map_server map_saver -f "+s;
-        system(s);
+        system(s.c_str());
     }
 
     void _showMaps()
     {
-        cout << "Displaying list of maps. Enter the map number to load." << endl;
-        client_show_maps.call(srv_show_maps);
+        std::cout << "Displaying list of maps. Enter the map number to load." << std::endl;
+        client_show_maps.call(srv_show_maps); 
+        std::vector<std::string> ops;
         u_int mapNumber;
-        cin >> mapNumber;
-        string s = "rosrun map_server map_server ";
+        std::cin >> mapNumber;
+        std::string s = "rosrun map_server map_server ";
         s += ops[mapNumber];
-        system(s);
+        system(s.c_str());
         
     }
 

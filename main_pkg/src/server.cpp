@@ -33,7 +33,7 @@ class Server
     int i = 0;
 
     //Stucture for storing tasks "name" is for giving the task a name,
-    // and PoseArray is an array consisting of coordinates.
+    // and PoseArray is an array consisting of coordinates.w
 public:
     struct store_task
     {

@@ -235,14 +235,14 @@ public:
         if(int (current_dock_state) == 0 && batterypct < minimum_battery_pct){ //Not in dock and under minimal%
             debug("battery time, mums ( ͡° ͜ʖ ͡°)");
 
-	    moveToDock();
+	    _moveToDock();
 
             return true;
         }	
         return false;
     }
 
-    void moveToDock(){
+    void _moveToDock(){
 	debug("to Dock");
 
 	//Get point 
@@ -252,7 +252,7 @@ public:
 	system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimal
     }
 
-    void moveToKitchen(){
+    void _moveToKitchen(){
        debug("to Kitchen");
 	//Get point 
 	_client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
