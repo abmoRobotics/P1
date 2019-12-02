@@ -1,4 +1,4 @@
-#include <explore/explore.h>
+/* #include <explore/explore.h>
 #include <std_srvs/Empty.h>
 
 class dinmor{
@@ -25,4 +25,4 @@ int main(int argc, char* argv[])
   e.start();
   ros::spin();
   return 0;
-} 
+}  */
