@@ -36,6 +36,7 @@
  *********************************************************************/
 
 #include <explore/explore.h>
+#include <std_srvs/Empty.h>
 
 #include <thread>
 
@@ -280,8 +281,22 @@ void Explore::reachedGoal(const actionlib::SimpleClientGoalState& status,
       true);
 }
 
+
 void Explore::start(){
   exploring_timer_.start();
+}
+
+bool Explore::toggle(std_srvs::SetBool::Request &req,
+              std_srvs::SetBool::Response &res){
+  static bool exploring = false;
+  if(req.data == false && exploring){
+    stop();
+    exploring = false;
+  }else if(req.data == true && !exploring){
+    start();
+    exploring = true;
+  }
+
 }
 
 void Explore::stop()
@@ -293,7 +308,7 @@ void Explore::stop()
 
 }  // namespace explore
 
-/* int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
   ros::init(argc, argv, "explore");
   if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME,
@@ -301,8 +316,10 @@ void Explore::stop()
     ros::console::notifyLoggerLevelsChanged();
   }
   explore::Explore explore;
+  ros::NodeHandle nh;
+  ros::ServiceServer server = nh.advertiseService("toggle_explore", &explore::Explore::toggle, &explore);
   ros::spin();
 
   return 0;
-} */
+}
   

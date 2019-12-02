@@ -45,6 +45,7 @@ private:
     //Services are defined
     ros::ServiceClient _client_receive_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");
     ros::ServiceClient _client_receive_pose_kitchen = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_kitchen");
+    ros::ServiceClient _client_receive_pose_charging = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_charging");
     //Subscribers
     ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_button_event, this);
 
@@ -52,6 +53,8 @@ private:
     //Service message for current job
     main_pkg::poseArray_srv _srv_receive_pose_array;
     main_pkg::pointStamped_srv _srv_receive_pose_kitchen;
+    main_pkg::pointStamped_srv _srv_receive_pose_charging;
+
 
     //Publisher for markers
     ros::Publisher pub_marker = nh.advertise<visualization_msgs::MarkerArray>(
@@ -98,10 +101,10 @@ public:
             _send_task();
         } else if (msg->button == msg->Button1)
         {
-            
+            _moveToKitchen();
         } else if (msg->button == msg->Button2)
         {
-            
+            _moveToDock();
         }
         
         
@@ -227,24 +230,33 @@ public:
     bool battery_check() //Returns true if it needs to recharge
     {
 
-        float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate prct
+        float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate pct
             
-        if(int (current_dock_state) == 0 && batterypct < minimum_battery_pct){ //Not in dock and under 
+        if(int (current_dock_state) == 0 && batterypct < minimum_battery_pct){ //Not in dock and under minimal%
             debug("battery time, mums ( ͡° ͜ʖ ͡°)");
 
- 	    _client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
-        _send_goal(_srv_receive_pose_kitchen.response);
-	    //_srv_receive_pose_kitchen.response.pose
-	    
-            //Kør til punkt foran dock
-            //Start autodock 
+	    moveToDock();
 
-
-            //system("roslaunch kobuki_auto_docking minimal.launch --screen");
-            //system("roslaunch kobuk i_auto_docking activate.launch --screen");
             return true;
         }	
         return false;
+    }
+
+    void moveToDock(){
+	debug("to Dock");
+
+	//Get point 
+	_client_receive_pose_charging.call(_srv_receive_pose_charging);
+	_send_goal(_srv_receive_pose_charging.response);
+
+	system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimal
+    }
+
+    void moveToKitchen(){
+       debug("to Kitchen");
+	//Get point 
+	_client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
+	_send_goal(_srv_receive_pose_kitchen.response);
     }
 
 public:

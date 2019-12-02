@@ -184,13 +184,26 @@ public:
 
     bool get_pose_kitchen(main_pkg::pointStamped_srv::Request &req,
                  main_pkg::pointStamped_srv::Response &res){
-	//Check if pose_kitchen has been set
+	//Check if pose_kitchen has been set (if not origo)
         if(pose_kitchen.point.x != 0 && pose_kitchen.point.y != 0 && pose_kitchen.point.z != 0){
 	    ROS_INFO("Kitchen point found!");	
 	    res.pose = pose_kitchen;
         }
 	else{		
 	    ROS_INFO("There is no point set for the kitchen");		
+	}
+
+    }
+
+    bool get_pose_charging(main_pkg::pointStamped_srv::Request &req,
+                 main_pkg::pointStamped_srv::Response &res){
+	//Check if pose_charging has been set (if not origo)
+        if(pose_charging.point.x != 0 && pose_charging.point.y != 0 && pose_charging.point.z != 0){
+	    ROS_INFO("Charging point found!");	
+	    res.pose = pose_charging;
+        }
+	else{		
+	    ROS_INFO("There is no point set for charging");		
 	}
 
     }
@@ -204,6 +217,8 @@ public:
     ros::ServiceServer server4 = _nh.advertiseService("recieve_task_name", &Server::send_task_name, this);
     ros::ServiceServer server5 = _nh.advertiseService("turtlebot_job", &Server::turtlebot_job, this);
     ros::ServiceServer server6 = _nh.advertiseService("get_job", &Server::get_job, this);
+    ros::ServiceServer server7 = _nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, this);
+    ros::ServiceServer server8 = _nh.advertiseService("get_pose_charging", &Server::get_pose_charging, this);
     //subsribers
     ros::Subscriber click_sub = _nh.subscribe("clicked_point", 100, &Server::recieve_points, this);
     }
