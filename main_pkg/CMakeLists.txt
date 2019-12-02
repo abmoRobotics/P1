@@ -141,7 +141,7 @@ include_directories(
  ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
+##Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/main_pkg.cpp
 # )
@@ -154,12 +154,12 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(buttons src/buttons.cpp)
-add_executable(battery src/battery.cpp)
-add_executable(led src/led.cpp)
-add_executable(sound src/sound.cpp)
-add_executable(sans src/sans.cpp)
-add_executable(depth src/depth.cpp)
+#add_executable(buttons src/buttons.cpp)
+#add_executable(battery src/battery.cpp)
+##add_executable(led src/led.cpp)
+#add_executable(sound src/sound.cpp)
+#add_executable(sans src/sans.cpp)
+#add_executable(depth src/depth.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -172,24 +172,24 @@ add_executable(depth src/depth.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(buttons
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(battery
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(led
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(sound
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(sans
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(depth
-  ${catkin_LIBRARIES}
-)
+#target_link_libraries(buttons
+#  ${catkin_LIBRARIES}
+#)
+#target_link_libraries(battery
+#  ${catkin_LIBRARIES}
+#)
+#target_link_libraries(led
+#  ${catkin_LIBRARIES}
+#)
+# target_link_libraries(sound
+#   ${catkin_LIBRARIES}
+# )e
+# target_link_libraries(sans
+#   ${catkin_LIBRARIES}
+# )
+# target_link_libraries(depth
+#   ${catkin_LIBRARIES}
+# )
 
 
 #############

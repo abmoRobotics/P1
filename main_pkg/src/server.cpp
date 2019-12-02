@@ -51,6 +51,8 @@ public:
 
     //We also define a point for the kitchen
     geometry_msgs::PointStamped pose_kitchen;
+    //Point for charging station is defined
+    geometry_msgs::PointStamped pose_charging;
     
     
 private:
@@ -59,8 +61,9 @@ private:
     enum server_state
     {
         inactivate,
-        storeTaskCoordinates,
-        storeKitchenPosition
+        taskCoordinates,
+        kitchenPos,
+        chargingPos
         //0 = inactivate no points can be stored
         //1 = points are stored to the task array
         //2 = points are stored to the kitchen position
@@ -90,18 +93,29 @@ private:
         pose_kitchen.header.stamp = ros::Time::now();
         pose_kitchen.header.frame_id = msg->header.frame_id;
     }
+    void insert_charging(const geometry_msgs::PointStamped::ConstPtr msg)
+    {
+        pose_charging.point.x = msg->point.x;
+        pose_charging.point.y = msg->point.y;
+        pose_charging.point.z = msg->point.z;
+        pose_charging.header.stamp = ros::Time::now();
+        pose_charging.header.frame_id = msg->header.frame_id;
+    }
+
 
 public:
     void recieve_points(const geometry_msgs::PointStamped::ConstPtr &msg)
     {
         switch (server_mode)
         {
-        case 1: //Insert point in task
+        case taskCoordinates: //Insert point in task
             insert_point(msg);
-            
             break;
-        case 2:
+        case kitchenPos:
             insert_kitchen(msg);
+            break;
+        case chargingPos:
+            insert_charging(msg);
             break;
         default:
             ROS_INFO("SERVER: CANNOT INSERT POINT");

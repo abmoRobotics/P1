@@ -31,6 +31,16 @@ private:
     void _clearScreen() { std::cout << std::string(20, '\n'); }
 
     //Menu that shows when trying to create a route
+        enum server_state
+    {
+        inactivate,
+        taskCoordinates,
+        kitchenPos,
+        chargingPos
+        //0 = inactivate no points can be stored
+        //1 = points are stored to the task array
+        //2 = points are stored to the kitchen position
+    };
     void _createMenu()
     {
         _clearScreen();
@@ -42,7 +52,7 @@ private:
         srv_add_task.request.name = nameTask;
         client_add_task.call(srv_add_task);
         //Function for changing server mode to allow for inserting points.
-        srv_server_mode.request.mode = 1;
+        srv_server_mode.request.mode = (int)taskCoordinates;
         client_server_mode.call(srv_server_mode);
 
         while (selection != 1)
@@ -56,7 +66,7 @@ private:
         //Function for incremeting vector
         client_stop_task.call(srv_stop_task);
         //Changing server_mode to 0
-        srv_server_mode.request.mode = 0;
+        srv_server_mode.request.mode = (int)inactivate;
         client_server_mode.call(srv_server_mode);
     };
 
@@ -92,6 +102,8 @@ private:
         client_turtlebot_job.call(srv_server_mode);
     }
 
+
+
     void _menu()
     {
         int c = 1;
@@ -103,24 +115,37 @@ private:
             std::cout << "1. Create route for Turtlebot" << std::endl;
             std::cout << "2. Send task for Turtlebot to perform" << std::endl;
             std::cout << "3. Start automatic mapping" << std::endl;
+            std::cout << "4. Insert kitchen point" << std::endl;
+            std::cout << "5. Insert charging station point" << std::endl;
             std::cout << "----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
-            switch (c)
+            while (1 < c > 5)
             {
-            case 1:
-                _createMenu();
-                break;
-            case 2:
-                _sendTask();
-                break;
-            case 3:
-                _automaticMapping();
-                break;
-            default:
-                std::cout << "error" << std::endl;
-                break;
+                switch (c){
+                case 1:
+                    _createMenu();
+                    break;
+                case 2:
+                    _sendTask();
+                    break;
+                case 3:
+                    _automaticMapping();
+                    break;
+                case 4:
+                    _insert_kit();
+                    break;
+                case 5:
+                    _automaticMapping();
+                    break;
+
+                default:
+                    std::cout << "error" << std::endl;
+                    break;
+                }
             }
+            
+            
         }
     }
 

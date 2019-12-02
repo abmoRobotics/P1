@@ -98,10 +98,10 @@ public:
             _send_task();
         } else if (msg->button == msg->Button1)
         {
-            /* code */
+            
         } else if (msg->button == msg->Button2)
         {
-            /* code */
+            
         }
         
         
