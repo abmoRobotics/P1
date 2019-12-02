@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <std_srvs/Empty.h>
+#include <std_srvs/SetBool.h>
 
 class Menu
 {

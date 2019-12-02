@@ -19,6 +19,7 @@
 #include <main_pkg/poseArray_srv.h>
 #include <string.h>
 #include <std_srvs/Empty.h>
+#include <std_srvs/SetBool.h>
 
 
 
