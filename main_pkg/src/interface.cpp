@@ -55,7 +55,8 @@ private:
         std::cin >> nameTask;
         //Function for sending name of task to server nameTask(nameTask);
         srv_add_task.request.name = nameTask;
-        client_add_task.call(srv_add_task);
+        bool e = client_add_task.call(srv_add_task);
+        std::cout << "bool return "<< e << std::endl;
         //Function for changing server mode to allow for inserting points.
         _server_mode(taskCoordinates);
 
