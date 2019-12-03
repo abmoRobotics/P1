@@ -74,10 +74,10 @@ public:
 
     void _receive_pose_array()
     {
-        debug("1");
+        //debug("1");
         _client_receive_pose_array.call(_srv_receive_pose_array);
         
-        debug("2");
+        //debug("2");
         if (!_srv_receive_pose_array.response.arr.poses.empty())
         {
             length_job = _srv_receive_pose_array.response.arr.poses.size();
@@ -89,7 +89,7 @@ public:
         else
         {
             _delete_markers();
-            std::cout << "No jobs pending" << std::endl;
+            //std::cout << "No jobs pending" << std::endl;
         }
         
     }
@@ -233,7 +233,7 @@ public:
         float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate pct
             
         if(int (current_dock_state) == 0 && batterypct < minimum_battery_pct){ //Not in dock and under minimal%
-            debug("battery time, mums ( ͡° ͜ʖ ͡°)");
+            debug("Battery is under minimal charge");
 
 	    _moveToDock();
 
@@ -243,7 +243,7 @@ public:
     }
 
     void _moveToDock(){
-	debug("to Dock");
+	debug("Moving to the dock");
 
 	//Get point 
 	_client_receive_pose_charging.call(_srv_receive_pose_charging);
@@ -253,7 +253,7 @@ public:
     }
 
     void _moveToKitchen(){
-       debug("to Kitchen");
+       debug("Moving to the kitchen");
 	//Get point 
 	_client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
 	_send_goal(_srv_receive_pose_kitchen.response);
@@ -269,6 +269,7 @@ public:
 //tydebugdef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> Client;
 int main(int argc, char *argv[])
 {
+    std::cout << "Starter turtlebot" << std::endl;
     ros::init(argc, argv, "caterbot");
     MoveBase e;
     ros::Rate loop_rate(1);
@@ -277,7 +278,6 @@ int main(int argc, char *argv[])
         if (e.job_size() == 0)      //If robot doesn't have any jobs to perform
         {
 	        if(!e.battery_check()){ //If it doesn't require recharging
-                std::cout << "kikik" << std::endl;
                 e._receive_pose_array();
             }
         }
