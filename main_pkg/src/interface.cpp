@@ -55,7 +55,8 @@ private:
         std::cin >> nameTask;
         //Function for sending name of task to server nameTask(nameTask);
         srv_add_task.request.name = nameTask;
-        client_add_task.call(srv_add_task);
+        bool e = client_add_task.call(srv_add_task);
+        std::cout << "bool return "<< e << std::endl;
         //Function for changing server mode to allow for inserting points.
         _server_mode(taskCoordinates);
 
@@ -184,6 +185,8 @@ private:
             std::cout << "3. Start automatic mapping" << std::endl;
             std::cout << "4. Insert kitchen point" << std::endl;
             std::cout << "5. Insert charging station point" << std::endl;
+            std::cout << "6. Save map" << std::endl;
+            std::cout << "7. Load map" << std::endl;
             std::cout << "----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
@@ -207,6 +210,12 @@ private:
                     break;
                 case 5:
                     _chargingPoint();
+                    break;
+                case 6:
+                    _saveMap();
+                    break;
+                case 7:
+                    _showMaps();
                     break;
 
                 default:
