@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 
 <launch>
-  <node name="interface_v2" pkg="main_pkg" type="interface_v2" output="screen" />
-  <node name="Caterroute_v2" pkg="main_pkg" type="Caterroute_v2" output="screen" /> 
+  <node name="interface" pkg="main_pkg" type="interface" output="screen" />
+  <node name="server" pkg="main_pkg" type="server" output="screen" /> 
   <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(find busroute)/config/busrouting.rviz"/>
 
 </launch>

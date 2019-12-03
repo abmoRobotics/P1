@@ -56,7 +56,9 @@ private:
         std::cin >> nameTask;
         //Function for sending name of task to server nameTask(nameTask);
         srv_add_task.request.name = nameTask;
+        ROS_INFO("1");
         client_add_task.call(srv_add_task);
+        ROS_INFO("2");
         //Function for changing server mode to allow for inserting points.
         _server_mode(taskCoordinates);
 
@@ -171,6 +173,7 @@ private:
             break;
         }
         client_server_mode.call(srv_server_mode);
+        std::cout << "Server mode chaged" << s << std::endl;
     }
     void _menu()
     {

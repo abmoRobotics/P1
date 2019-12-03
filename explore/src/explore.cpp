@@ -287,6 +287,7 @@ void Explore::start(){
 
 bool Explore::toggle(std_srvs::SetBool::Request &req,
               std_srvs::SetBool::Response &res){
+  ROS_INFO_STREAM("explore server toggling explore..");
   static bool exploring = false;
   if(req.data == false && exploring){
     stop();

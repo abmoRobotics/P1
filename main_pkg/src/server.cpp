@@ -20,7 +20,9 @@
 #include <string.h>
 #include <std_srvs/Empty.h>
 #include <std_srvs/SetBool.h>
-
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 
 class Services{
@@ -32,6 +34,8 @@ class Services{
 class Server
 {
     int i = 0;
+    std::vector<std::string> ops;
+    char sti[1025];
 
     //Stucture for storing tasks "name" is for giving the task a name,
     // and PoseArray is an array consisting of coordinates.w
@@ -103,10 +107,40 @@ private:
         pose_charging.header.frame_id = msg->header.frame_id;
     }
 
+    void traverse(char *fn, bool canAdd) 
+    {
+        DIR *dir;
+        struct dirent *entry;
+        char path[1025];
+        struct stat info;
+
+        if ((dir = opendir(fn)) != NULL){
+            while ((entry = readdir(dir)) != NULL) {
+                if (entry->d_name[1]== 'g'&& entry->d_name[2]== 'h' && !canAdd){
+                    strncpy(sti,fn,1025);
+                    traverse(fn, true);
+                    return;
+                }
+                else if (entry->d_name[0] != '.') {
+                    if(canAdd)  
+                        ops.push_back(entry->d_name);
+                    strcpy(path, fn);
+                    strcat(path, "/");
+                    strcat(path, entry->d_name);
+                    stat(path, &info);
+                    if (S_ISDIR(info.st_mode))  
+                        traverse(path, false);
+                }
+            }
+            closedir(dir);
+        }
+    }
+
 
 public:
     void recieve_points(const geometry_msgs::PointStamped::ConstPtr &msg)
     {
+        
         switch (server_mode)
         {
         case taskCoordinates: //Insert point in task
@@ -127,6 +161,7 @@ public:
     bool change_server_mode(main_pkg::serverMode::Request &req,
                             main_pkg::serverMode::Response &res)
     {
+        std::cout << "server mode changed" << std::endl;
         server_mode = req.mode;
         res.response = server_mode;
         ROS_INFO("Changed mode");
@@ -136,6 +171,8 @@ public:
     bool add_task(main_pkg::routeName::Request &req,
                   main_pkg::routeName::Response &res)
     {
+        ROS_INFO("INFDS");
+        std::cout << "dsfasdf" << std::endl;
         savedTasks.name = req.name;
         return 1;
     }
@@ -202,11 +239,21 @@ public:
         if(pose_charging.point.x != 0 && pose_charging.point.y != 0 && pose_charging.point.z != 0){
 	    ROS_INFO("Charging point found!");	
 	    res.pose = pose_charging;
+        }else{		
+            ROS_INFO("There is no point set for charging");		
         }
-	else{		
-	    ROS_INFO("There is no point set for charging");		
-	}
+    }
 
+    bool display_maps(std_srvs::Empty::Request &req,
+                   std_srvs::Empty::Response &res)
+    {
+        ROS_INFO_STREAM("server displaying maps..");
+        traverse("/home", false);
+
+        printf("%s\n\n", sti);
+        for(u_int i = 0; i < ops.size(); i++)
+            std::cout <<ops[i]<<std::endl;
+        return 1;
     }
 
 public:
@@ -218,8 +265,9 @@ public:
     ros::ServiceServer server4 = _nh.advertiseService("recieve_task_name", &Server::send_task_name, this);
     ros::ServiceServer server5 = _nh.advertiseService("turtlebot_job", &Server::turtlebot_job, this);
     ros::ServiceServer server6 = _nh.advertiseService("get_job", &Server::get_job, this);
-    ros::ServiceServer server7 = _nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, this);
+    /* ros::ServiceServer server7 = _nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, this);
     ros::ServiceServer server8 = _nh.advertiseService("get_pose_charging", &Server::get_pose_charging, this);
+    ros::ServiceServer server9 = _nh.advertiseService("show_maps", &Server::display_maps, this); */
     //subsribers
     ros::Subscriber click_sub = _nh.subscribe("clicked_point", 100, &Server::recieve_points, this);
     }
@@ -229,7 +277,7 @@ int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "Caterroute");
     Server server_instance;
-
+    ROS_INFO("oKOK");
 
     ros::Rate loop_rate(1);
     while (ros::ok())
