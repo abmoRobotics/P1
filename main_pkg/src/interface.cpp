@@ -9,6 +9,7 @@
 #include <std_srvs/Empty.h>
 #include <actionlib/client/simple_action_client.h>
 #include <main_pkg/reverseAction.h>
+#include <std_srvs/SetBool.h>
 
 class Menu
 {
@@ -173,6 +174,7 @@ private:
             break;
         }
         client_server_mode.call(srv_server_mode);
+        std::cout << "Server mode chaged" << s << std::endl;
     }
     void _menu()
     {

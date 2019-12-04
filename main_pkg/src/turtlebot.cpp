@@ -101,15 +101,17 @@ public:
 
     void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg){
         
-        if (msg->button == msg->Button0)
-        {
-            _send_task();
-        } else if (msg->button == msg->Button1)
-        {
-            _moveToKitchen();
-        } else if (msg->button == msg->Button2)
-        {
-            _moveToDock();
+        if(msg->state == msg->PRESSED){
+		if (msg->button == msg->Button0)
+		{
+		    _send_task();
+		} else if (msg->button == msg->Button1)
+		{
+		    _moveToKitchen();
+		} else if (msg->button == msg->Button2)
+		{
+		    _moveToDock();
+		}
         }
         
         
@@ -168,8 +170,12 @@ public:
     int _send_goal(main_pkg::pointStamped_srv::Response p){
         move_base_msgs::MoveBaseGoal goal;
         goal.target_pose.pose.position = p.pose.point;
+	    goal.target_pose.pose.orientation.w = 1.0;
         goal.target_pose.header.frame_id = p.pose.header.frame_id;
         goal.target_pose.header.stamp = ros::Time::now();
+
+        std::cout << "Target point:" << goal.target_pose.pose << std::endl;
+
         MoveBaseClient.waitForServer();
         MoveBaseClient.sendGoalAndWait(goal);
         if (MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
@@ -234,8 +240,9 @@ public:
 
     bool battery_check() //Returns true if it needs to recharge
     {
-
+	//debug("Checking battery");
         float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate pct
+	//ROS_INFO("pct: %f", batterypct);
             
         if(int (current_dock_state) == 0 && batterypct < minimum_battery_pct){ //Not in dock and under minimal%
             debug("Battery is under minimal charge");
@@ -248,20 +255,41 @@ public:
     }
 
     void _moveToDock(){
-	debug("Moving to the dock");
 
-	//Get point 
-	_client_receive_pose_charging.call(_srv_receive_pose_charging);
-	_send_goal(_srv_receive_pose_charging.response);
 
-	system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimal
+        debug("Moving to the dock");
+
+        //Get point 
+        _client_receive_pose_charging.call(_srv_receive_pose_charging);
+
+        main_pkg::pointStamped_srv::Response chargingPoint = _srv_receive_pose_charging.response;
+
+        if(chargingPoint.pose.point.x != 0 && chargingPoint.pose.point.y != 0 && chargingPoint.pose.point.z != 0){
+	        ROS_INFO("Charging point found!");	
+	        _send_goal(chargingPoint);
+            system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimalt
+        }
+        else{		
+            ROS_INFO("There is no point set for charging");		
+        }
     }
 
     void _moveToKitchen(){
        debug("Moving to the kitchen");
-	//Get point 
-	_client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
-	_send_goal(_srv_receive_pose_kitchen.response);
+        //Get point
+        _client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
+                
+        main_pkg::pointStamped_srv::Response kitchenPoint = _srv_receive_pose_kitchen.response;
+
+        //Check if pose_kitchen has been set (if not origo)
+        if (kitchenPoint.pose.point.x != 0 && kitchenPoint.pose.point.y != 0 && kitchenPoint.pose.point.z != 0)
+        {
+            ROS_INFO("Kitchen point found!");
+            _send_goal(kitchenPoint);
+        }
+        else{
+            ROS_INFO("Kitchen point not found");
+        }
     }
 
 public:

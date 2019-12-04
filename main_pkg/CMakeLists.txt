@@ -214,6 +214,15 @@ include_directories(
 #  ${catkin_LIBRARIES}
 #)
 
+
+
+#add_executable(${PROJECT_NAME}_action_server src/action_server.cpp)
+#set_target_properties(${PROJECT_NAME}_action_server PROPERTIES OUTPUT_NAME action_server PREFIX "")
+#target_link_libraries(${PROJECT_NAME}_action_server
+#  ${catkin_LIBRARIES}
+#)
+
+
 add_executable(${PROJECT_NAME}_interface src/interface.cpp)
 set_target_properties(${PROJECT_NAME}_interface PROPERTIES OUTPUT_NAME interface PREFIX "")
 target_link_libraries(${PROJECT_NAME}_interface
@@ -268,14 +277,6 @@ set_target_properties(${PROJECT_NAME}_turtlebot PROPERTIES OUTPUT_NAME turtlebot
 target_link_libraries(${PROJECT_NAME}_turtlebot
   ${catkin_LIBRARIES}
 )
-
-
-#add_executable(${PROJECT_NAME}_action_server src/action_server.cpp)
-#set_target_properties(${PROJECT_NAME}_action_server PROPERTIES OUTPUT_NAME action_server PREFIX "")
-#target_link_libraries(${PROJECT_NAME}_action_server
-#  ${catkin_LIBRARIES}
-#)
-
 
 #catkin_package(CATKIN_DEPENDS message_runtime)
 ## Mark executable scripts (Python etc.) for installation

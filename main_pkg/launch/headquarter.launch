@@ -4,6 +4,6 @@
   <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(find main_pkg)/config/turtlebot_navigation.rviz"/>
   <node name="interface" pkg="main_pkg" type="interface" output="screen" />
   <node name="server" pkg="main_pkg" type="server" output="screen" /> 
-  
+
 
 </launch>

@@ -93,6 +93,8 @@ private:
         pose_kitchen.point.z = msg->point.z;
         pose_kitchen.header.stamp = ros::Time::now();
         pose_kitchen.header.frame_id = msg->header.frame_id;
+
+        std::cout << "Kitchen point:" << pose_kitchen.point << std::endl;
     }
     void insert_charging(const geometry_msgs::PointStamped::ConstPtr msg)
     {
@@ -101,6 +103,8 @@ private:
         pose_charging.point.z = msg->point.z;
         pose_charging.header.stamp = ros::Time::now();
         pose_charging.header.frame_id = msg->header.frame_id;
+
+        std::cout << "Charging point:" << pose_charging.point << std::endl;
     }
 
     void traverse(char *fn, bool canAdd) 
@@ -137,6 +141,7 @@ private:
 public:
     void recieve_points(const geometry_msgs::PointStamped::ConstPtr &msg)
     {
+        
         switch (server_mode)
         {
         case taskCoordinates: //Insert point in task
@@ -157,6 +162,7 @@ public:
     bool change_server_mode(main_pkg::serverMode::Request &req,
                             main_pkg::serverMode::Response &res)
     {
+        std::cout << "server mode changed" << std::endl;
         server_mode = req.mode;
         res.response = server_mode;
         ROS_INFO("Changed mode");
@@ -166,6 +172,8 @@ public:
     bool add_task(main_pkg::routeName::Request &req,
                   main_pkg::routeName::Response &res)
     {
+        ROS_INFO("INFDS");
+        std::cout << "dsfasdf" << std::endl;
         savedTasks.name = req.name;
         std::cout << req.name << std::endl;
         return 1;
@@ -210,34 +218,21 @@ public:
         }
         else
         {
-            ROS_INFO("NO TASKS");
+            //ROS_INFO("NO TASKS");
         }
     }
 
     bool get_pose_kitchen(main_pkg::pointStamped_srv::Request &req,
                           main_pkg::pointStamped_srv::Response &res)
     {
-        //Check if pose_kitchen has been set (if not origo)
-        if (pose_kitchen.point.x != 0 && pose_kitchen.point.y != 0 && pose_kitchen.point.z != 0)
-        {
-            ROS_INFO("Kitchen point found!");
-            res.pose = pose_kitchen;
-        }
-        else
-        {
-            ROS_INFO("There is no point set for the kitchen");
-        }
+        //Send respons tilbage til turtlebot.cpp
+        res.pose = pose_kitchen;
     }
 
     bool get_pose_charging(main_pkg::pointStamped_srv::Request &req,
                  main_pkg::pointStamped_srv::Response &res){
-	//Check if pose_charging has been set (if not origo)
-        if(pose_charging.point.x != 0 && pose_charging.point.y != 0 && pose_charging.point.z != 0){
-	    ROS_INFO("Charging point found!");	
-	    res.pose = pose_charging;
-        }else{		
-            ROS_INFO("There is no point set for charging");		
-        }
+        //Send respons tilbage
+        res.pose = pose_charging;
     }
 
     bool display_maps(std_srvs::Empty::Request &req,
@@ -254,7 +249,6 @@ public:
 
 public:
     Server() {
-
     }
 };
 
@@ -279,14 +273,14 @@ int main(int argc, char *argv[])
     while (ros::ok())
     {
         
-        if (!server_instance.v_publishedTasks.empty())
+        /* if (!server_instance.v_publishedTasks.empty())
         {
             std::cout << "PENDING TASKS:" << std::endl;
             for (size_t i = 0; i < server_instance.v_publishedTasks.size(); i++)
             {
                 std::cout << "TASK " << i + 1 << ": " << server_instance.v_publishedTasks[i].name << std::endl;
             }
-        }
+        } */
 
         ros::spinOnce();
         loop_rate.sleep();
