@@ -165,9 +165,12 @@ public:
     int _send_goal(main_pkg::pointStamped_srv::Response p){
         move_base_msgs::MoveBaseGoal goal;
         goal.target_pose.pose.position = p.pose.point;
-	goal.target_pose.pose.orientation.w = 1.0;
+	    goal.target_pose.pose.orientation.w = 1.0;
         goal.target_pose.header.frame_id = p.pose.header.frame_id;
         goal.target_pose.header.stamp = ros::Time::now();
+
+        std::cout << "Target point:" << goal.target_pose.pose << std::endl;
+
         MoveBaseClient.waitForServer();
         MoveBaseClient.sendGoalAndWait(goal);
         if (MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
