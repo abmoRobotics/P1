@@ -58,6 +58,7 @@ Explore::Explore()
   , prev_distance_(0)
   , last_markers_count_(0)
 {
+  ROS_INFO_STREAM("e1 Starting explore server.");
   double timeout;
   double min_frontier_size;
   private_nh_.param("planner_frequency", planner_frequency_, 1.0);
@@ -69,6 +70,7 @@ Explore::Explore()
   private_nh_.param("gain_scale", gain_scale_, 1.0);
   private_nh_.param("min_frontier_size", min_frontier_size, 0.5);
 
+  ROS_INFO_STREAM("e2 Starting explore server.");
   search_ = frontier_exploration::FrontierSearch(costmap_client_.getCostmap(),
                                                  potential_scale_, gain_scale_,
                                                  min_frontier_size);
@@ -82,9 +84,11 @@ Explore::Explore()
   move_base_client_.waitForServer();
   ROS_INFO("Connected to move_base server");
 
+  ROS_INFO_STREAM("e3 Starting explore server.");
   exploring_timer_ =
       relative_nh_.createTimer(ros::Duration(1. / planner_frequency_),
                                [this](const ros::TimerEvent&) { makePlan(); },false,false);
+  ROS_INFO_STREAM("e4 Starting explore server.");
 }
 
 Explore::~Explore()
@@ -310,14 +314,20 @@ void Explore::stop()
 
 int main(int argc, char* argv[])
 {
+  std::cout << "din mor" << std::endl;
   ros::init(argc, argv, "explore");
+  ROS_INFO_STREAM("1 Starting explore server.");
   if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME,
                                      ros::console::levels::Debug)) {
     ros::console::notifyLoggerLevelsChanged();
   }
+  ROS_INFO_STREAM("2 Starting explore server.");
   explore::Explore explore;
+  ROS_INFO_STREAM("3 Starting explore server.");
   ros::NodeHandle nh;
+  ROS_INFO_STREAM("4 Starting explore server.");
   ros::ServiceServer server = nh.advertiseService("toggle_explore", &explore::Explore::toggle, &explore);
+  ROS_INFO_STREAM("5 Starting explore server.");
   ros::spin();
 
   return 0;

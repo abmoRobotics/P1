@@ -16,8 +16,6 @@ int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "route_server");
     ros::NodeHandle nh;
-
-    
     ros::ServiceServer server = nh.advertiseService("route", result);
 
     ROS_INFO("Server started");

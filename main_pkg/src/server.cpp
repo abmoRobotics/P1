@@ -24,12 +24,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-
-class Services{
-
+class Services
+{
 };
-
-
 
 class Server
 {
@@ -47,7 +44,7 @@ public:
     };
 
     //Two instances of store_task is defined
-    store_task savedTasks;     //for saving the different tasks
+    store_task savedTasks; //for saving the different tasks
 
     //Each of these instances of store_task needs to be stored within a vector.
 public:
@@ -58,8 +55,7 @@ public:
     geometry_msgs::PointStamped pose_kitchen;
     //Point for charging station is defined
     geometry_msgs::PointStamped pose_charging;
-    
-    
+
 private:
     ros::NodeHandle _nh;
     //We define the different state of the server as an enum
@@ -97,6 +93,8 @@ private:
         pose_kitchen.point.z = msg->point.z;
         pose_kitchen.header.stamp = ros::Time::now();
         pose_kitchen.header.frame_id = msg->header.frame_id;
+
+        std::cout << "Kitchen point:" << pose_kitchen.point << std::endl;
     }
     void insert_charging(const geometry_msgs::PointStamped::ConstPtr msg)
     {
@@ -105,6 +103,8 @@ private:
         pose_charging.point.z = msg->point.z;
         pose_charging.header.stamp = ros::Time::now();
         pose_charging.header.frame_id = msg->header.frame_id;
+
+        std::cout << "Charging point:" << pose_kitchen.point << std::endl;
     }
 
     void traverse(char *fn, bool canAdd) 
@@ -116,7 +116,8 @@ private:
 
         if ((dir = opendir(fn)) != NULL){
             while ((entry = readdir(dir)) != NULL) {
-                if (entry->d_name[1]== 'g'&& entry->d_name[2]== 'h' && !canAdd){
+                std::string s = entry->d_name;
+                if (s.find("mymap") != std::string::npos && !canAdd){
                     strncpy(sti,fn,1025);
                     traverse(fn, true);
                     return;
@@ -174,6 +175,7 @@ public:
         ROS_INFO("INFDS");
         std::cout << "dsfasdf" << std::endl;
         savedTasks.name = req.name;
+        std::cout << req.name << std::endl;
         return 1;
     }
 
@@ -216,38 +218,27 @@ public:
         }
         else
         {
-            ROS_INFO("NO TASKS");
+            //ROS_INFO("NO TASKS");
         }
     }
 
     bool get_pose_kitchen(main_pkg::pointStamped_srv::Request &req,
-                 main_pkg::pointStamped_srv::Response &res){
-	//Check if pose_kitchen has been set (if not origo)
-        if(pose_kitchen.point.x != 0 && pose_kitchen.point.y != 0 && pose_kitchen.point.z != 0){
-	    ROS_INFO("Kitchen point found!");	
-	    res.pose = pose_kitchen;
-        }
-	else{		
-	    ROS_INFO("There is no point set for the kitchen");		
-	}
-
+                          main_pkg::pointStamped_srv::Response &res)
+    {
+        //Send respons tilbage til turtlebot.cpp
+        res.pose = pose_kitchen;
     }
 
     bool get_pose_charging(main_pkg::pointStamped_srv::Request &req,
                  main_pkg::pointStamped_srv::Response &res){
-	//Check if pose_charging has been set (if not origo)
-        if(pose_charging.point.x != 0 && pose_charging.point.y != 0 && pose_charging.point.z != 0){
-	    ROS_INFO("Charging point found!");	
-	    res.pose = pose_charging;
-        }else{		
-            ROS_INFO("There is no point set for charging");		
-        }
+        //Send respons tilbage
+        res.pose = pose_charging;
     }
 
     bool display_maps(std_srvs::Empty::Request &req,
                    std_srvs::Empty::Response &res)
     {
-        ROS_INFO_STREAM("server displaying maps..");
+        ROS_INFO_STREAM("Server displaying maps..");
         traverse("/home", false);
 
         printf("%s\n\n", sti);
@@ -258,38 +249,38 @@ public:
 
 public:
     Server() {
-    
-    ros::ServiceServer server = _nh.advertiseService("add_task", &Server::add_task, this);
-    ros::ServiceServer server2 = _nh.advertiseService("stop_task", &Server::stop_task, this);
-    ros::ServiceServer server3 = _nh.advertiseService("server_mode", &Server::change_server_mode, this);
-    ros::ServiceServer server4 = _nh.advertiseService("recieve_task_name", &Server::send_task_name, this);
-    ros::ServiceServer server5 = _nh.advertiseService("turtlebot_job", &Server::turtlebot_job, this);
-    ros::ServiceServer server6 = _nh.advertiseService("get_job", &Server::get_job, this);
-    /* ros::ServiceServer server7 = _nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, this);
-    ros::ServiceServer server8 = _nh.advertiseService("get_pose_charging", &Server::get_pose_charging, this);
-    ros::ServiceServer server9 = _nh.advertiseService("show_maps", &Server::display_maps, this); */
-    //subsribers
-    ros::Subscriber click_sub = _nh.subscribe("clicked_point", 100, &Server::recieve_points, this);
     }
 };
 
 int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "Caterroute");
+    ros::NodeHandle nh;
     Server server_instance;
-    ROS_INFO("oKOK");
 
+    ros::ServiceServer server = nh.advertiseService("add_task", &Server::add_task, &server_instance);
+    ros::ServiceServer server2 = nh.advertiseService("stop_task", &Server::stop_task, &server_instance);
+    ros::ServiceServer server3 = nh.advertiseService("server_mode", &Server::change_server_mode, &server_instance);
+    ros::ServiceServer server4 = nh.advertiseService("recieve_task_name", &Server::send_task_name, &server_instance);
+    ros::ServiceServer server5 = nh.advertiseService("turtlebot_job", &Server::turtlebot_job, &server_instance);
+    ros::ServiceServer server6 = nh.advertiseService("get_job", &Server::get_job, &server_instance);
+    ros::ServiceServer server7 = nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, &server_instance);
+    ros::ServiceServer server8 = nh.advertiseService("get_pose_charging", &Server::get_pose_charging, &server_instance);
+        //subsribers
+    ros::Subscriber click_sub = nh.subscribe("clicked_point", 100, &Server::recieve_points, &server_instance);
+    
     ros::Rate loop_rate(1);
     while (ros::ok())
     {
-        if (!server_instance.v_publishedTasks.empty())
+        
+        /* if (!server_instance.v_publishedTasks.empty())
         {
             std::cout << "PENDING TASKS:" << std::endl;
             for (size_t i = 0; i < server_instance.v_publishedTasks.size(); i++)
             {
                 std::cout << "TASK " << i + 1 << ": " << server_instance.v_publishedTasks[i].name << std::endl;
             }
-        }
+        } */
 
         ros::spinOnce();
         loop_rate.sleep();
@@ -297,4 +288,3 @@ int main(int argc, char *argv[])
 
     ros::spin();
 }
-

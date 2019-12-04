@@ -74,10 +74,10 @@ public:
 
     void _receive_pose_array()
     {
-        debug("1");
+        //debug("1");
         _client_receive_pose_array.call(_srv_receive_pose_array);
         
-        debug("2");
+        //debug("2");
         if (!_srv_receive_pose_array.response.arr.poses.empty())
         {
             length_job = _srv_receive_pose_array.response.arr.poses.size();
@@ -89,7 +89,7 @@ public:
         else
         {
             _delete_markers();
-            std::cout << "No jobs pending" << std::endl;
+            //std::cout << "No jobs pending" << std::endl;
         }
         
     }
@@ -229,11 +229,12 @@ public:
 
     bool battery_check() //Returns true if it needs to recharge
     {
-
+	debug("Checking battery");
         float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate pct
+	ROS_INFO("pct: %f", batterypct);
             
         if(int (current_dock_state) == 0 && batterypct < minimum_battery_pct){ //Not in dock and under minimal%
-            debug("battery time, mums ( ͡° ͜ʖ ͡°)");
+            debug("Battery is under minimal charge");
 
 	    _moveToDock();
 
@@ -243,20 +244,41 @@ public:
     }
 
     void _moveToDock(){
-	debug("to Dock");
 
-	//Get point 
-	_client_receive_pose_charging.call(_srv_receive_pose_charging);
-	_send_goal(_srv_receive_pose_charging.response);
 
-	system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimal
+        debug("Moving to the dock");
+
+        //Get point 
+        _client_receive_pose_charging.call(_srv_receive_pose_charging);
+
+        main_pkg::pointStamped_srv::Response chargingPoint = _srv_receive_pose_charging.response;
+
+        if(chargingPoint.pose.point.x != 0 && chargingPoint.pose.point.y != 0 && chargingPoint.pose.point.z != 0){
+	        ROS_INFO("Charging point found!");	
+	        _send_goal(chargingPoint);
+            system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimalt
+        }
+        else{		
+            ROS_INFO("There is no point set for charging");		
+        }
     }
 
     void _moveToKitchen(){
-       debug("to Kitchen");
-	//Get point 
-	_client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
-	_send_goal(_srv_receive_pose_kitchen.response);
+       debug("Moving to the kitchen");
+        //Get point
+        _client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
+                
+        main_pkg::pointStamped_srv::Response kitchenPoint = _srv_receive_pose_kitchen.response;
+
+        //Check if pose_kitchen has been set (if not origo)
+        if (kitchenPoint.pose.point.x != 0 && kitchenPoint.pose.point.y != 0 && kitchenPoint.pose.point.z != 0)
+        {
+            ROS_INFO("Kitchen point found!");
+            _send_goal(kitchenPoint);
+        }
+        else{
+            ROS_INFO("Kitchen point not found");
+        }
     }
 
 public:
@@ -269,6 +291,7 @@ public:
 //tydebugdef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> Client;
 int main(int argc, char *argv[])
 {
+    std::cout << "Starter turtlebot" << std::endl;
     ros::init(argc, argv, "caterbot");
     MoveBase e;
     ros::Rate loop_rate(1);
@@ -277,7 +300,6 @@ int main(int argc, char *argv[])
         if (e.job_size() == 0)      //If robot doesn't have any jobs to perform
         {
 	        if(!e.battery_check()){ //If it doesn't require recharging
-                std::cout << "kikik" << std::endl;
                 e._receive_pose_array();
             }
         }
