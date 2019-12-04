@@ -96,15 +96,17 @@ public:
 
     void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg){
         
-        if (msg->button == msg->Button0)
-        {
-            _send_task();
-        } else if (msg->button == msg->Button1)
-        {
-            _moveToKitchen();
-        } else if (msg->button == msg->Button2)
-        {
-            _moveToDock();
+        if(msg->state == msg->PRESSED){
+		if (msg->button == msg->Button0)
+		{
+		    _send_task();
+		} else if (msg->button == msg->Button1)
+		{
+		    _moveToKitchen();
+		} else if (msg->button == msg->Button2)
+		{
+		    _moveToDock();
+		}
         }
         
         
@@ -247,9 +249,19 @@ public:
 
 	//Get point 
 	_client_receive_pose_charging.call(_srv_receive_pose_charging);
-	_send_goal(_srv_receive_pose_charging.response);
+        //Check if point has been set
+	if(_srv_receive_pose_charging.response.pose.point.x != 0 &&
+	   _srv_receive_pose_charging.response.pose.point.y != 0 &&
+           _srv_receive_pose_charging.response.pose.point.z != 0){
+	
+	    _send_goal(_srv_receive_pose_charging.response);
 
-	system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimal
+	    system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimal
+        }
+	else{
+	    debug("There is no point set for the charging station");
+	}
+
     }
 
     void _moveToKitchen(){
