@@ -7,6 +7,8 @@
 #include <vector>
 #include <std_srvs/SetBool.h>
 #include <std_srvs/Empty.h>
+#include <actionlib/client/simple_action_client.h>
+#include <main_pkg/reverseAction.h>
 
 class Menu
 {
@@ -241,6 +243,17 @@ public:
 int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "interface");
-    Menu e;
+    actionlib::SimpleActionClient<main_pkg::reverseAction> _ac("move",true);
+        main_pkg::reverseGoal goal;
+        goal.distance = 20.0;
+        ROS_INFO("11");
+        _ac.waitForServer();
+        ROS_INFO("12");
+        _ac.sendGoal(goal);
+        ROS_INFO("13");
+        _ac.waitForResult();
+        ROS_INFO("TEST");
+    //Menu e;
     //menu();
+    ros::spin();
 }
