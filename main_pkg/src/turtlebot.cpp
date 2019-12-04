@@ -247,7 +247,6 @@ public:
 
     void _moveToDock(){
 
-<<<<<<< HEAD
 
         debug("Moving to the dock");
 
@@ -264,23 +263,6 @@ public:
         else{		
             ROS_INFO("There is no point set for charging");		
         }
-=======
-	//Get point 
-	_client_receive_pose_charging.call(_srv_receive_pose_charging);
-        //Check if point has been set
-	if(_srv_receive_pose_charging.response.pose.point.x != 0 &&
-	   _srv_receive_pose_charging.response.pose.point.y != 0 &&
-           _srv_receive_pose_charging.response.pose.point.z != 0){
-	
-	    _send_goal(_srv_receive_pose_charging.response);
-
-	    system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimal
-        }
-	else{
-	    debug("There is no point set for the charging station");
-	}
-
->>>>>>> a68d4b7049c27d9087ed8c8ae839db1a43cbe1fc
     }
 
     void _moveToKitchen(){
