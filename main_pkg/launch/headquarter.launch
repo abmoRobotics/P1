@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 
 <launch>
+<<<<<<< HEAD
   <node name="interface" pkg="main_pkg" type="interface" output="screen" />
   <node name="server" pkg="main_pkg" type="server" output="screen" /> 
   <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(find busroute)/config/busrouting.rviz"/>
+=======
+  <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(find main_pkg)/config/turtlebot_navigation.rviz"/>
+  <node name="interface" pkg="main_pkg" type="interface" output="screen" />
+  <node name="server" pkg="main_pkg" type="server" output="screen" /> 
+  
+>>>>>>> a68d4b7049c27d9087ed8c8ae839db1a43cbe1fc
 
 </launch>

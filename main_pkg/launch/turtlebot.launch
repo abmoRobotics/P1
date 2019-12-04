@@ -1,5 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
 <launch>
-    <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
-    <include file="$(find turtlebot_navigation)/launch/gmapping_demo.launch"/>
-    <node name="busroute" pkg="busroute" type="busroute_node"/>
+  <node name="turtlebot" pkg="main_pkg" type="turtlebot" output="screen" />
+  <include file="$(find turtlebot_bringup)/launch/minimal.launch" />
+    <include file="$(find turtlebot_navigation)/launch/gmapping_demo.launch" />
+  <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(find main_pkg)/config/turtlebot_navigation.rviz"/>
+  <include file="$(find kobuki_auto_docking)/launch/minimal.launch" />
+
 </launch>
+
+
+
