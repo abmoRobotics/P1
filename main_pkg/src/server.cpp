@@ -104,7 +104,7 @@ private:
         pose_charging.header.stamp = ros::Time::now();
         pose_charging.header.frame_id = msg->header.frame_id;
 
-        std::cout << "Charging point:" << pose_kitchen.point << std::endl;
+        std::cout << "Charging point:" << pose_charging.point << std::endl;
     }
 
     void traverse(char *fn, bool canAdd) 

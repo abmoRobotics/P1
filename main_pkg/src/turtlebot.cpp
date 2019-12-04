@@ -165,6 +165,7 @@ public:
     int _send_goal(main_pkg::pointStamped_srv::Response p){
         move_base_msgs::MoveBaseGoal goal;
         goal.target_pose.pose.position = p.pose.point;
+	goal.target_pose.pose.orientation.w = 1.0;
         goal.target_pose.header.frame_id = p.pose.header.frame_id;
         goal.target_pose.header.stamp = ros::Time::now();
         MoveBaseClient.waitForServer();
@@ -231,9 +232,9 @@ public:
 
     bool battery_check() //Returns true if it needs to recharge
     {
-	debug("Checking battery");
+	//debug("Checking battery");
         float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate pct
-	ROS_INFO("pct: %f", batterypct);
+	//ROS_INFO("pct: %f", batterypct);
             
         if(int (current_dock_state) == 0 && batterypct < minimum_battery_pct){ //Not in dock and under minimal%
             debug("Battery is under minimal charge");
