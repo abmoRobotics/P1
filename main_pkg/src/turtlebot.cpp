@@ -317,10 +317,10 @@ class Reverse
     main_pkg::reverseResult _result;
     public:
     Reverse(std::string name) :
-        _as(_nh,name, boost::bind(&Reverse::executeCB,this,_1),false),
+        _as(_nh, name, boost::bind(&Reverse::executeCB, this, _1), false),
          _actionName(name){
-
-    }
+            _as.start();
+        }
 
     void executeCB(const main_pkg::reverseGoalConstPtr &goal){
         ros::Rate loop_rate(1);
@@ -375,9 +375,8 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "caterbot");
     char c;
     MoveBase e;
-    Reverse r("move");
+    Reverse r("mover");
     debug("1");
-    std::cin >> c;
     debug("2");
     
     debug("3");

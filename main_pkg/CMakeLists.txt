@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
     turtlesim
     std_msgs
     message_generation
+    actionlib
     actionlib_msgs
     move_base_msgs
     tf
