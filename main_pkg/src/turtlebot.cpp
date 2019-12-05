@@ -299,13 +299,25 @@ public:
 class Reverse
 {
     protected:
+
+    enum charger_state{
+        DISCHARGING = 0,
+        DOCKING_CHARGED  = 2,
+        DOCKING_CHARGING = 6,
+        ADAPTER_CHARGED  = 18,
+        ADAPTER_CHARGING = 22,
+    };
+
+    charger_state _chargingState;
     geometry_msgs::Twist t;
     ros::NodeHandle _nh;
     ros::Subscriber sub = _nh.subscribe("/mobile_base/events/power_system", 0, &Reverse::dockingPos, this);
+    ros::Subscriber sub = _nh.subscribe("/mobile_base/sensors/core", 0, &Reverse::chargingState, this);
     ros::Subscriber subOdom = _nh.subscribe("/odom", 0, &Reverse::position, this);
     ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",10);
     geometry_msgs::Point dockPos, currentPos;
     geometry_msgs::Point xPos;
+    
     
     actionlib::SimpleActionServer<main_pkg::reverseAction> _as;
     std::string _actionName;
@@ -318,12 +330,11 @@ class Reverse
          _actionName(name){
             _as.start();
             std::cout << "started" << std::endl;
-            xPos.x = std::numeric_limits<double>::infinity();
          }
 
     void executeCB(const main_pkg::reverseGoalConstPtr &goal){
-        if(!docking){
-            if(xPos.x == std::numeric_limits<double>::infinity()){
+        if(_chargingState==DISCHARGING){
+            if(xPos.x || xPos.y || xPos.z){
                 _result.result = 1;
             }else{
                 _result.result = 0;
@@ -337,7 +348,7 @@ class Reverse
         t.linear.x = -0.2;
         double distance = 0;
         std::cout << "Backing up" << std::endl;
-        while(ros::ok() && distance < 0.4){
+        while(ros::ok() && distance < goal->distance){
             cmd_vel.publish(t);
             _feedback.status = sqrt(std::pow(dockPos.x - currentPos.x,2)+std::pow(dockPos.y - currentPos.y,2));
             distance = _feedback.status;
@@ -378,6 +389,10 @@ class Reverse
     void position(const nav_msgs::Odometry::ConstPtr &msg){
         //save position 
         currentPos = msg->pose.pose.position;
+    }
+
+    void chargingState(const kobuki_msgs::SensorState::ConstPtr &msg){
+        _chargingState=(charger_state)msg->charger;
     }
 
 

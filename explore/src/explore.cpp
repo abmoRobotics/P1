@@ -291,7 +291,7 @@ void Explore::start(){
  
   actionlib::SimpleActionClient<main_pkg::reverseAction> _ac("mover",true);
   main_pkg::reverseGoal goal;
-  goal.distance = 20.0;
+  goal.distance = 0.4; //[m]
   ROS_INFO("11");
   _ac.waitForServer();
   ROS_INFO("12");
