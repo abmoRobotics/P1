@@ -248,14 +248,14 @@ int main(int argc, char *argv[])
     actionlib::SimpleActionClient<main_pkg::reverseAction> _ac("mover",true);
         main_pkg::reverseGoal goal;
         goal.distance = 20.0;
-/*         ROS_INFO("11");
+        ROS_INFO("11");
         _ac.waitForServer();
         ROS_INFO("12");
         _ac.sendGoal(goal);
         ROS_INFO("13");
         _ac.waitForResult();
-        ROS_INFO("TEST"); */
-    Menu e;
+        ROS_INFO("TEST");
+    //Menu e;
     //menu();
     ros::spin();
 }

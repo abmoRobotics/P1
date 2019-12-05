@@ -113,9 +113,6 @@ public:
 		    _moveToDock();
 		}
         }
-        
-        
-        
     }
 
 
@@ -306,7 +303,7 @@ class Reverse
     ros::NodeHandle _nh;
     ros::Subscriber sub = _nh.subscribe("/mobile_base/events/power_system", 0, &Reverse::dockingPos, this);
     ros::Subscriber subOdom = _nh.subscribe("/odom", 0, &Reverse::position, this);
-    ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel",10);
+    ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",10);
     geometry_msgs::Point dockPos;
     geometry_msgs::Point currentPos;
     geometry_msgs::Point xPos;
@@ -320,13 +317,14 @@ class Reverse
         _as(_nh, name, boost::bind(&Reverse::executeCB, this, _1), false),
          _actionName(name){
             _as.start();
+            std::cout << "started" << std::endl;
         }
 
     void executeCB(const main_pkg::reverseGoalConstPtr &goal){
-        ros::Rate loop_rate(1);
+        ros::Rate loop_rate(100);
         debug("5");
         bool success = true;
-        t.linear.x = -1.0;
+        t.linear.x = -0.2;
         double distance = 0;
         while(ros::ok() && distance < 20.0){
             cmd_vel.publish(t);
