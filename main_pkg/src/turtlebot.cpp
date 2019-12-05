@@ -312,7 +312,7 @@ class Reverse
     geometry_msgs::Twist t;
     ros::NodeHandle _nh;
     ros::Subscriber sub = _nh.subscribe("/mobile_base/events/power_system", 0, &Reverse::dockingPos, this);
-    ros::Subscriber sub = _nh.subscribe("/mobile_base/sensors/core", 0, &Reverse::chargingState, this);
+    ros::Subscriber sub1 = _nh.subscribe("/mobile_base/sensors/core", 0, &Reverse::chargingState, this);
     ros::Subscriber subOdom = _nh.subscribe("/odom", 0, &Reverse::position, this);
     ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",10);
     geometry_msgs::Point dockPos, currentPos;
@@ -348,8 +348,10 @@ class Reverse
         t.linear.x = -0.2;
         double distance = 0;
         std::cout << "Backing up" << std::endl;
-        while(ros::ok() && distance < goal->distance){
+        std::cout << goal->distance << std::endl;
+        while(ros::ok() && distance < 0.4){
             cmd_vel.publish(t);
+            std::cout << "Backing up" << std::endl;
             _feedback.status = sqrt(std::pow(dockPos.x - currentPos.x,2)+std::pow(dockPos.y - currentPos.y,2));
             distance = _feedback.status;
             _as.publishFeedback(_feedback);
@@ -383,7 +385,7 @@ class Reverse
         }else if (state->event == state->PLUGGED_TO_ADAPTER || state->event == state->UNPLUGGED){
             docking = false;
         }
-        ROS_INFO(std::to_string(state->event));
+       // ROS_INFO(std::to_string(state->event));
         
     }
     void position(const nav_msgs::Odometry::ConstPtr &msg){
