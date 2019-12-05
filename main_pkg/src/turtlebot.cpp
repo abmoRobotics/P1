@@ -326,10 +326,11 @@ class Reverse
         bool success = true;
         t.linear.x = -0.2;
         double distance = 0;
-        while(ros::ok() && distance < 20.0){
+        std::cout << "Backing up" << std::endl;
+        while(ros::ok() && distance < 0.4){
             cmd_vel.publish(t);
-            debug("6");
             _feedback.status = sqrt(std::pow(dockPos.x - currentPos.x,2)+std::pow(dockPos.y - currentPos.y,2));
+            distance = _feedback.status;
             _as.publishFeedback(_feedback);
             if(_as.isPreemptRequested() || !ros::ok()){
                 _as.setPreempted();
@@ -356,6 +357,7 @@ class Reverse
         //todo add doskPos = NULLs
         if(state->event == state->PLUGGED_TO_DOCKBASE || state->event == state->CHARGE_COMPLETED){
             dockPos = currentPos;
+            std::cout << "Lade pois" << std::endl;
         }
     }
     void position(const nav_msgs::Odometry::ConstPtr &msg){
