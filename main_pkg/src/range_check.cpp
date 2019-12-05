@@ -6,7 +6,7 @@
     //6. initialiser en variabel, som holder på komma-tal og 
     //giv den navnet "lavest". Få den til at starte med at være værdien 10000:
     
-    //7. lav en for -lykke, hvor man, inde i scan-beskeden, itererer 
+    //7. lav en for -lykke, hvor man, inde i "message", itererer 
     //igennem hele mængden af "ranges". "ranges" ligger i "message" og tilgås 
     //ved en pil( -> ). Størrelsen af mængden af "range" listen er: ranges.size()
     for(){
