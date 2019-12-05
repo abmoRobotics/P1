@@ -333,7 +333,10 @@ class Reverse
          }
 
     void executeCB(const main_pkg::reverseGoalConstPtr &goal){
+        //if not in dock, then:            
         if(_chargingState==DISCHARGING){
+            //if xPos(point that should be 40cm from doc) has still not received a position, then 
+            // the bot should not run. Else it should run, because it knows the docking reference point.
             if(xPos.x || xPos.y || xPos.z){
                 _result.result = 1;
             }else{
@@ -385,7 +388,7 @@ class Reverse
         }else if (state->event == state->PLUGGED_TO_ADAPTER || state->event == state->UNPLUGGED){
             docking = false;
         }
-       // ROS_INFO(std::to_string(state->event));
+       ROS_INFO(std::to_string(state->event).c_str());
         
     }
     void position(const nav_msgs::Odometry::ConstPtr &msg){
