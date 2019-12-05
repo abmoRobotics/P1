@@ -36,6 +36,8 @@
  *********************************************************************/
 
 #include <explore/explore.h>
+#include <actionlib/client/simple_action_client.h>
+#include <main_pkg/reverseAction.h>
 
 #include <thread>
 
@@ -286,12 +288,31 @@ void Explore::reachedGoal(const actionlib::SimpleClientGoalState& status,
 
 
 void Explore::start(){
+ 
+  actionlib::SimpleActionClient<main_pkg::reverseAction> _ac("mover",true);
+  main_pkg::reverseGoal goal;
+  goal.distance = 20.0;
+  ROS_INFO("11");
+  _ac.waitForServer();
+  ROS_INFO("12");
+  _ac.sendGoal(goal);
+  ROS_INFO("13");
+  _ac.waitForResult();
+  ROS_INFO("TEST");
+  const main_pkg::reverseResultConstPtr state = _ac.getResult();
+  std::cout << "state: " << std::to_string(state->result) << std::endl;
+  // if it doesn't have a docking point, it returns.
+  if(state->result == 1){
+    stop();
+    ROS_ERROR("Robot has no docking point. Please mooooove it.");
+    return;
+  }
   exploring_timer_.start();
 }
 
 bool Explore::toggle(std_srvs::SetBool::Request &req,
               std_srvs::SetBool::Response &res){
-  ROS_INFO_STREAM("explore server toggling explore..");
+  ROS_INFO_STREAM("Explore server toggling explore..");
   static bool exploring = false;
   if(req.data == false && exploring){
     stop();
@@ -314,7 +335,7 @@ void Explore::stop()
 
 int main(int argc, char* argv[])
 {
-  std::cout << "din mor" << std::endl;
+  std::cout << "If not getting response, try roslaunching instead ;)" << std::endl;
   ros::init(argc, argv, "explore");
   ROS_INFO_STREAM("1 Starting explore server.");
   if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME,

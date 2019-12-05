@@ -304,23 +304,33 @@ class Reverse
     ros::Subscriber sub = _nh.subscribe("/mobile_base/events/power_system", 0, &Reverse::dockingPos, this);
     ros::Subscriber subOdom = _nh.subscribe("/odom", 0, &Reverse::position, this);
     ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",10);
-    geometry_msgs::Point dockPos;
-    geometry_msgs::Point currentPos;
+    geometry_msgs::Point dockPos, currentPos;
     geometry_msgs::Point xPos;
     
     actionlib::SimpleActionServer<main_pkg::reverseAction> _as;
     std::string _actionName;
     main_pkg::reverseFeedback _feedback;
     main_pkg::reverseResult _result;
+    bool docking;
     public:
     Reverse(std::string name) :
         _as(_nh, name, boost::bind(&Reverse::executeCB, this, _1), false),
          _actionName(name){
             _as.start();
             std::cout << "started" << std::endl;
-        }
+            xPos.x = std::numeric_limits<double>::infinity();
+         }
 
     void executeCB(const main_pkg::reverseGoalConstPtr &goal){
+        if(!docking){
+            if(xPos.x == std::numeric_limits<double>::infinity()){
+                _result.result = 1;
+            }else{
+                _result.result = 0;
+            }
+           _as.setSucceeded(_result); 
+           return;
+        }
         ros::Rate loop_rate(100);
         debug("5");
         bool success = true;
@@ -352,13 +362,18 @@ class Reverse
     }
 
 
-
     void dockingPos(const kobuki_msgs::PowerSystemEvent::ConstPtr& state){
         //todo add doskPos = NULLs
+        ROS_INFO("Charge info received.");
         if(state->event == state->PLUGGED_TO_DOCKBASE || state->event == state->CHARGE_COMPLETED){
+            docking = true;
             dockPos = currentPos;
             std::cout << "Lade pois" << std::endl;
+        }else if (state->event == state->PLUGGED_TO_ADAPTER || state->event == state->UNPLUGGED){
+            docking = false;
         }
+        ROS_INFO(std::to_string(state->event));
+        
     }
     void position(const nav_msgs::Odometry::ConstPtr &msg){
         //save position 
