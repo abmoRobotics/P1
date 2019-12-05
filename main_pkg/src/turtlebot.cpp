@@ -259,7 +259,7 @@ public:
 
         main_pkg::pointStamped_srv::Response chargingPoint = _srv_receive_pose_charging.response;
 
-        if(chargingPoint.pose.point.x != 0 && chargingPoint.pose.point.y != 0 && chargingPoint.pose.point.z != 0){
+        if(chargingPoint.pose.point.x != 0 || chargingPoint.pose.point.y != 0 || chargingPoint.pose.point.z != 0){
 	        ROS_INFO("Charging point found!");	
 	        _send_goal(chargingPoint);
             system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimalt
@@ -277,7 +277,7 @@ public:
         main_pkg::pointStamped_srv::Response kitchenPoint = _srv_receive_pose_kitchen.response;
 
         //Check if pose_kitchen has been set (if not origo)
-        if (kitchenPoint.pose.point.x != 0 && kitchenPoint.pose.point.y != 0 && kitchenPoint.pose.point.z != 0)
+        if (kitchenPoint.pose.point.x != 0 || kitchenPoint.pose.point.y != 0 || kitchenPoint.pose.point.z != 0)
         {
             ROS_INFO("Kitchen point found!");
             _send_goal(kitchenPoint);
