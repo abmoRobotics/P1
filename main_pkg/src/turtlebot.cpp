@@ -172,6 +172,7 @@ public:
     {
         move_base_msgs::MoveBaseGoal goal;
         debug("5");
+        std::cout << p.arr << std::endl;
         goal.target_pose.pose = p.arr.poses[0];
         debug("6");
         goal.target_pose.header.frame_id = p.arr.header.frame_id;
