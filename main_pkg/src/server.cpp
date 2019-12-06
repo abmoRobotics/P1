@@ -172,10 +172,10 @@ public:
     bool add_task(main_pkg::routeName::Request &req,
                   main_pkg::routeName::Response &res)
     {
-        ROS_INFO("INFDS");
-        std::cout << "dsfasdf" << std::endl;
+        //ROS_INFO("INFDS");
+        //std::cout << "dsfasdf" << std::endl;
         savedTasks.name = req.name;
-        std::cout << req.name << std::endl;
+        //std::cout << req.name << std::endl;
         return 1;
     }
 
