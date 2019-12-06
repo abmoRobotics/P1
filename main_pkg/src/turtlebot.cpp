@@ -15,6 +15,7 @@
 #include <main_pkg/reverseAction.h>
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
+#include <std_srvs/SetBool.h>
 //#include <rate.h>
 
 void debug(std::string a)
@@ -326,21 +327,27 @@ class Reverse
     std::string _actionName;
     main_pkg::reverseFeedback _feedback;
     main_pkg::reverseResult _result;
+    MoveBase m;
     bool docking;
     public:
-    Reverse(std::string name) :
+    Reverse(std::string name, MoveBase *e) :
         _as(_nh, name, boost::bind(&Reverse::executeCB, this, _1), false),
          _actionName(name){
             _as.start();
             std::cout << "started" << std::endl;
+            m = e;
          }
 
     void executeCB(const main_pkg::reverseGoalConstPtr &goal){
+        //if not in dock, then:            
         if(_chargingState==DISCHARGING){
+            //if xPos(point that should be 40cm from doc) has still not received a position, then 
+            // the bot should not run. Else it should run, because it knows the docking reference point.
             if(xPos.x || xPos.y || xPos.z){
                 _result.result = 1;
             }else{
                 _result.result = 0;
+                
             }
            _as.setSucceeded(_result); 
            return;
@@ -388,7 +395,7 @@ class Reverse
         }else if (state->event == state->PLUGGED_TO_ADAPTER || state->event == state->UNPLUGGED){
             docking = false;
         }
-       // ROS_INFO(std::to_string(state->event));
+       ROS_INFO(std::to_string(state->event).c_str());
         
     }
     void position(const nav_msgs::Odometry::ConstPtr &msg){
@@ -400,6 +407,25 @@ class Reverse
         _chargingState=(charger_state)msg->charger;
     }
 
+    bool returnToDoc(std_srvs::SetBool::Request &req,
+              std_srvs::SetBool::Response &res){
+        
+        if(req.data == true){
+            move_base_msgs::MoveBaseGoal goal;
+            debug("5");
+            goal.target_pose.pose = p.arr.poses[0];
+            debug("6");
+            goal.target_pose.header.frame_id = p.arr.header.frame_id;
+            debug("7");
+            goal.target_pose.header.stamp = ros::Time::now();
+            debug("8");
+            zMoveBaseClient.waitForServer();
+            debug("9");
+            zMoveBaseClient.sendGoal(goal);
+            debug("10");
+            zMoveBaseClient.waitForResult();
+        }
+    }
 
 };
 
@@ -410,23 +436,12 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "caterbot");
     char c;
     MoveBase e;
-    Reverse r("mover");
+    Reverse r("mover", e);
     debug("1");
     debug("2");
-    
+    ros::NodeHandle n;
+    ros::ServiceServer serv = n.advertiseService("return_to_doc",)
     debug("3");
     ros::Rate loop_rate(1);
-    /* while (ros::ok)
-    {
-        if (e.job_size() == 0)      //If robot doesn't have any jobs to perform
-        {
-	        if(!e.battery_check()){ //If it doesn't require recharging
-                e._receive_pose_array();
-            }
-        }
-
-        ros::spinOnce();
-        loop_rate.sleep();
-    } */
     ros::spin();
 }
