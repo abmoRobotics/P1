@@ -32,6 +32,9 @@ void debug(std::string a)
     }
 }
 
+
+
+
 class MoveBase
 {
 private:
