@@ -5,11 +5,16 @@
 #include <move_base_msgs/MoveBaseGoal.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
+#include <actionlib/server/simple_action_server.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <kobuki_msgs/ButtonEvent.h>
 #include <kobuki_msgs/SensorState.h>
+#include <kobuki_msgs/PowerSystemEvent.h>
 #include <main_pkg/pointStamped_srv.h>
+#include <main_pkg/reverseAction.h>
+#include <geometry_msgs/Twist.h>
+#include <nav_msgs/Odometry.h>
 //#include <rate.h>
 
 void debug(std::string a)
@@ -108,9 +113,6 @@ public:
 		    _moveToDock();
 		}
         }
-        
-        
-        
     }
 
 
@@ -294,14 +296,92 @@ public:
     }
 };
 
+class Reverse
+{
+    protected:
+    geometry_msgs::Twist t;
+    ros::NodeHandle _nh;
+    ros::Subscriber sub = _nh.subscribe("/mobile_base/events/power_system", 0, &Reverse::dockingPos, this);
+    ros::Subscriber subOdom = _nh.subscribe("/odom", 0, &Reverse::position, this);
+    ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",10);
+    geometry_msgs::Point dockPos;
+    geometry_msgs::Point currentPos;
+    geometry_msgs::Point xPos;
+    
+    actionlib::SimpleActionServer<main_pkg::reverseAction> _as;
+    std::string _actionName;
+    main_pkg::reverseFeedback _feedback;
+    main_pkg::reverseResult _result;
+    public:
+    Reverse(std::string name) :
+        _as(_nh, name, boost::bind(&Reverse::executeCB, this, _1), false),
+         _actionName(name){
+            _as.start();
+            std::cout << "started" << std::endl;
+        }
+
+    void executeCB(const main_pkg::reverseGoalConstPtr &goal){
+        ros::Rate loop_rate(100);
+        debug("5");
+        bool success = true;
+        t.linear.x = -0.2;
+        double distance = 0;
+        std::cout << "Backing up" << std::endl;
+        while(ros::ok() && distance < 0.4){
+            cmd_vel.publish(t);
+            _feedback.status = sqrt(std::pow(dockPos.x - currentPos.x,2)+std::pow(dockPos.y - currentPos.y,2));
+            distance = _feedback.status;
+            _as.publishFeedback(_feedback);
+            if(_as.isPreemptRequested() || !ros::ok()){
+                _as.setPreempted();
+                success = false;
+                break;
+            }
+            loop_rate.sleep();
+        }
+        
+        if(success){
+            _result.result = _feedback.status;
+            xPos = currentPos;
+            _as.setSucceeded(_result);
+        }
+
+        
+        //Public cmd_vel
+
+    }
+
+
+
+    void dockingPos(const kobuki_msgs::PowerSystemEvent::ConstPtr& state){
+        //todo add doskPos = NULLs
+        if(state->event == state->PLUGGED_TO_DOCKBASE || state->event == state->CHARGE_COMPLETED){
+            dockPos = currentPos;
+            std::cout << "Lade pois" << std::endl;
+        }
+    }
+    void position(const nav_msgs::Odometry::ConstPtr &msg){
+        //save position 
+        currentPos = msg->pose.pose.position;
+    }
+
+
+};
+
 //tydebugdef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> Client;
 int main(int argc, char *argv[])
 {
     std::cout << "Starter turtlebot" << std::endl;
     ros::init(argc, argv, "caterbot");
+    char c;
     MoveBase e;
+    Reverse r("mover");
+    debug("1");
+    debug("2");
+    
+    debug("3");
     ros::Rate loop_rate(1);
-    while (ros::ok)
+    /* while (ros::ok)
     {
         if (e.job_size() == 0)      //If robot doesn't have any jobs to perform
         {
@@ -312,6 +392,6 @@ int main(int argc, char *argv[])
 
         ros::spinOnce();
         loop_rate.sleep();
-    }
+    } */
     ros::spin();
 }

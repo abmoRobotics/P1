@@ -11,8 +11,8 @@ class Route
 {
 private:
     unsigned int stops_initialized;
-    geometry_msgs::PointStamped from, to;
-    actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> client;
+    geometry_msgs::PointStamped from, to; 
+    actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> client; //MoveBaseGoal, MoveBaseActionResult, MoveBaseActionFeedback 
     ros::Publisher marker_pub;
     ros::Subscriber click_sub;
 
