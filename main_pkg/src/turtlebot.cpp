@@ -33,23 +33,32 @@ void debug(std::string a)
     }
 }
 
+
+/**
+ * Class for moving the turtlebot is defined.
+ *
+ * This is a base class used by follwing classes: MoveBase, Reverse
+ */
 class moveCommands{
-    //Actions are defined
+    //Actions is defined.
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
     
     protected:
+
+    /**
+     * Sum numbers in a vector.
+     *
+     * @param MoveBaseGoal whose value define the goal for the turtlebot.
+     */
     void _move_base(move_base_msgs::MoveBaseGoal goal){
-        MoveBaseClient.waitForServer();
+        MoveBaseClient.waitForServer();             //Waiting until connection to action is established
         debug("9");
-        MoveBaseClient.sendGoal(goal);
+        MoveBaseClient.sendGoal(goal);              //When connection is established send the goal to the action server
         debug("10");
-        MoveBaseClient.waitForResult();
+        MoveBaseClient.waitForResult();             //Pause program until result is recieved
         debug("11");;
     }
-
-    moveCommands() : MoveBaseClient("move_base",true){
-
-}
+    moveCommands() : MoveBaseClient("move_base",true){}     //MoveBaseClient is initialized
 };
 
 
@@ -57,27 +66,26 @@ class moveCommands{
 class MoveBase :  moveCommands
 {
 private:
-
+    //A enum with 2 possibilities defined
     enum navMode
     {
         automatic,
         operation
     };
-    navMode _navMode = automatic;
-    
-    //nodeHandle defined
+    //Variable for determining whether button should be pressed between navigation points
+    navMode _navMode = operation;
+    //NodeHandle defined
     ros::NodeHandle nh;
     //Actions are defined
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
     //Services are defined
-    ros::ServiceClient _client_receive_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");
-    ros::ServiceClient _client_receive_pose_kitchen = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_kitchen");
-    ros::ServiceClient _client_receive_pose_charging = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_charging");
+    ros::ServiceClient _client_receive_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");                   //Service for recieving the next array of points(a task) from the server
+    ros::ServiceClient _client_receive_pose_kitchen = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_kitchen");     //Service for getting the pose of the kitchen point
+    ros::ServiceClient _client_receive_pose_charging = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_charging");   //Service for getting the pose of the charging point
     //Subscribers
-    ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_button_event, this);
-
-    ros::Subscriber batterySub = nh.subscribe("/mobile_base/sensors/core", 1, &MoveBase::batteryCallback, this);
-    //Service message for current job
+    ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_button_event, this);                    //
+    ros::Subscriber batterySub = nh.subscribe("/mobile_base/sensors/core", 1, &MoveBase::batteryCallback, this);            //
+    //Custom service messages defined
     main_pkg::poseArray_srv _srv_receive_pose_array;
     main_pkg::pointStamped_srv _srv_receive_pose_kitchen;
     main_pkg::pointStamped_srv _srv_receive_pose_charging;
@@ -124,16 +132,16 @@ public:
     void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg){
         
         if(msg->state == msg->PRESSED){
-		if (msg->button == msg->Button0)
-		{
-		    _send_task();
-		} else if (msg->button == msg->Button1)
-		{
-		    _moveToKitchen();
-		} else if (msg->button == msg->Button2)
-		{
-		    _moveToDock();
-		}
+            if (msg->button == msg->Button0)
+            {
+                _send_task();
+            } else if (msg->button == msg->Button1)
+            {
+                _moveToKitchen();
+            } else if (msg->button == msg->Button2)
+            {
+                _moveToDock();
+            }
         }
     }
 
@@ -294,7 +302,7 @@ public:
         _client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
                 
         main_pkg::pointStamped_srv::Response kitchenPoint = _srv_receive_pose_kitchen.response;
-
+        
         //Check if pose_kitchen has been set (if not origo)
         if (kitchenPoint.pose.point.x != 0 || kitchenPoint.pose.point.y != 0 || kitchenPoint.pose.point.z != 0)
         {
@@ -335,11 +343,11 @@ class Reverse : public moveCommands
     geometry_msgs::PointStamped currentPos, xPos, dockPos;
     
     
-    actionlib::SimpleActionServer<main_pkg::reverseAction> _as;
-    std::string _actionName;
-    main_pkg::reverseFeedback _feedback;
-    main_pkg::reverseResult _result;
-    bool docking;
+    actionlib::SimpleActionServer<main_pkg::reverseAction> _as;     
+    std::string _actionName;                                        
+    main_pkg::reverseFeedback _feedback;                            
+    main_pkg::reverseResult _result;                                
+    bool docking;                                                   
     public:
     Reverse(std::string name) :
         _as(_nh, name, boost::bind(&Reverse::executeCB, this, _1), false),
@@ -442,7 +450,7 @@ int main(int argc, char *argv[])
     
     debug("3");
     ros::Rate loop_rate(1);
-    /* while (ros::ok)
+    while (ros::ok)
     {
         if (e.job_size() == 0)      //If robot doesn't have any jobs to perform
         {
@@ -453,6 +461,6 @@ int main(int argc, char *argv[])
 
         ros::spinOnce();
         loop_rate.sleep();
-    } */
+    }
     ros::spin();
 }
