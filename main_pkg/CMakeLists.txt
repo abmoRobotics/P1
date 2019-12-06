@@ -72,7 +72,7 @@ find_package(catkin REQUIRED COMPONENTS
   routeName.srv
   serverMode.srv
   recieve_task_name.srv
-  turtlebot_job.srv
+ # turtlebot_job.srv
   poseArray_srv.srv
   pointStamped_srv.srv
  )
