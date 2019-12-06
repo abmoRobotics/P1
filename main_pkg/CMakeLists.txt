@@ -61,9 +61,9 @@ find_package(catkin REQUIRED COMPONENTS
   FILES
 #   Message1.msg
 #   Message2.msg
-pose.msg
-poseArray.msg
-poseTasks.msg
+#pose.msg
+#poseArray.msg
+#poseTasks.msg
 )
 
 ## Generate services in the 'srv' folder
