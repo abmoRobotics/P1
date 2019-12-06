@@ -170,23 +170,25 @@ public:
 
     int _send_goal(main_pkg::poseArray_srv::Response p)
     {
-        move_base_msgs::MoveBaseGoal goal;
-        debug("5");
-        goal.target_pose.pose = p.arr.poses[0];
-        debug("6");
-        goal.target_pose.header.frame_id = p.arr.header.frame_id;
-        debug("7");
-        goal.target_pose.header.stamp = ros::Time::now();
-        debug("8");
-        moveCommands::_move_base(goal);
-        if (MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
-            std::cout << "Reached goal: " << 1 + 1 << " OF " << length_job << std::endl;
-        }
-        else{
-            std::cout << "ERROR - Current State: " << MoveBaseClient.getState().toString() << std::endl;
-        }
+        if(!p.arr.poses.empty()){
+            move_base_msgs::MoveBaseGoal goal;
+            debug("5");
+            goal.target_pose.pose = p.arr.poses[0];
+            debug("6");
+            goal.target_pose.header.frame_id = p.arr.header.frame_id;
+            debug("7");
+            goal.target_pose.header.stamp = ros::Time::now();
+            debug("8");
+            moveCommands::_move_base(goal);
+            if (MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
+                std::cout << "Reached goal: " << 1 + 1 << " OF " << length_job << std::endl;
+            }
+            else{
+                std::cout << "ERROR - Current State: " << MoveBaseClient.getState().toString() << std::endl;
+            }
 
-        _srv_receive_pose_array.response.arr.poses.erase(_srv_receive_pose_array.response.arr.poses.begin());
+            _srv_receive_pose_array.response.arr.poses.erase(_srv_receive_pose_array.response.arr.poses.begin());
+        }
     }
     
     int _send_goal(main_pkg::pointStamped_srv::Response p){

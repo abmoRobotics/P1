@@ -182,6 +182,13 @@ public:
     bool stop_task(std_srvs::Empty::Request &req,
                    std_srvs::Empty::Response &res)
     {
+        if(pose_kitchen.point.x || pose_kitchen.point.y || pose_kitchen.point.z ){
+            geometry_msgs::PoseStamped t;
+            t.pose.position = pose_kitchen.point;
+            t.header.stamp = ros::Time::now();
+            t.header.frame_id = pose_kitchen.header.frame_id;
+            savedTasks.poseArray.poses.push_back(t.pose);
+        }
         v_savedTasks.push_back(savedTasks);
         savedTasks.poseArray.poses.clear();
     }
