@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   map_msgs
   move_base_msgs
   nav_msgs
+  main_pkg
   roscpp
   std_msgs
   tf

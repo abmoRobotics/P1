@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
+#include <geometry_msgs/Point.h>
 //5. navngiv callback funktionen. den skal returnere ingenting og 
 //parameteren skal være: const sensor_msgs::LaserScanConstPtr &message
 
@@ -20,10 +21,11 @@
 
 int main(int argc, char *argv[]){
 
+    
     //1. initialiser ros for denne node. parametrene skal være: argc, argv og ">>fil navnet<<":
     
     //2. initialiser en nodehandle instance
-    
+        
     //3. subcribe til "/scan" topic, konstant lagre 1 besked i hukommelsen, samt 
     //angiv en callback funktion til at behandle beskederne fra "/scan"(der skal 
     //være et "&"foran callbackens navn):

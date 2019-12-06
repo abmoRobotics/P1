@@ -14,6 +14,7 @@
 #include <main_pkg/pointStamped_srv.h>
 #include <main_pkg/reverseAction.h>
 #include <geometry_msgs/Twist.h>
+#include <std_msgs/SetBool.h>
 #include <nav_msgs/Odometry.h>
 //#include <rate.h>
 
@@ -32,7 +33,28 @@ void debug(std::string a)
     }
 }
 
-class MoveBase
+class moveCommands{
+    //Actions are defined
+    actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+    
+    public:
+    void _move_base(move_base_msgs::MoveBaseGoal goal){
+        MoveBaseClient.waitForServer();
+        debug("9");
+        MoveBaseClient.sendGoal(goal);
+        debug("10");
+        MoveBaseClient.waitForResult();
+        debug("11");;
+    }
+
+    moveCommands() : MoveBaseClient("move_base",true){
+
+}
+};
+
+
+
+class MoveBase : public moveCommands
 {
 private:
 
@@ -148,12 +170,7 @@ public:
         debug("7");
         goal.target_pose.header.stamp = ros::Time::now();
         debug("8");
-        MoveBaseClient.waitForServer();
-        debug("9");
-        MoveBaseClient.sendGoal(goal);
-        debug("10");
-        MoveBaseClient.waitForResult();
-        debug("11");
+        _move_base(goal);
         if (MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
             std::cout << "Reached goal: " << 1 + 1 << " OF " << length_job << std::endl;
         }
@@ -296,40 +313,62 @@ public:
     }
 };
 
-class Reverse
+class Reverse : public moveCommands
 {
     protected:
+
+    enum charger_state{
+        DISCHARGING = 0,
+        DOCKING_CHARGED  = 2,
+        DOCKING_CHARGING = 6,
+        ADAPTER_CHARGED  = 18,
+        ADAPTER_CHARGING = 22,
+    };
+
+    charger_state _chargingState;
     geometry_msgs::Twist t;
     ros::NodeHandle _nh;
     ros::Subscriber sub = _nh.subscribe("/mobile_base/events/power_system", 0, &Reverse::dockingPos, this);
+    ros::Subscriber sub1 = _nh.subscribe("/mobile_base/sensors/core", 0, &Reverse::chargingState, this);
     ros::Subscriber subOdom = _nh.subscribe("/odom", 0, &Reverse::position, this);
     ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",10);
-    geometry_msgs::Point dockPos;
-    geometry_msgs::Point currentPos;
-    geometry_msgs::Point xPos;
+    geometry_msgs::PointStamped currentPos, xPos, dockPos;
+    
     
     actionlib::SimpleActionServer<main_pkg::reverseAction> _as;
     std::string _actionName;
     main_pkg::reverseFeedback _feedback;
     main_pkg::reverseResult _result;
+    bool docking;
     public:
     Reverse(std::string name) :
         _as(_nh, name, boost::bind(&Reverse::executeCB, this, _1), false),
          _actionName(name){
             _as.start();
             std::cout << "started" << std::endl;
-        }
+         }
 
     void executeCB(const main_pkg::reverseGoalConstPtr &goal){
+        if(_chargingState==DISCHARGING){
+            if(xPos.point.x || xPos.point.y || xPos.point.z){
+                _result.result = 1;
+            }else{
+                _result.result = 0;
+            }
+           _as.setSucceeded(_result); 
+           return;
+        }
         ros::Rate loop_rate(100);
         debug("5");
         bool success = true;
         t.linear.x = -0.2;
         double distance = 0;
         std::cout << "Backing up" << std::endl;
+        std::cout << goal->distance << std::endl;
         while(ros::ok() && distance < 0.4){
             cmd_vel.publish(t);
-            _feedback.status = sqrt(std::pow(dockPos.x - currentPos.x,2)+std::pow(dockPos.y - currentPos.y,2));
+            std::cout << "Backing up" << std::endl;
+            _feedback.status = sqrt(std::pow(dockPos.point.x - currentPos.point.x,2)+std::pow(dockPos.point.y - currentPos.point.y,2));
             distance = _feedback.status;
             _as.publishFeedback(_feedback);
             if(_as.isPreemptRequested() || !ros::ok()){
@@ -352,19 +391,42 @@ class Reverse
     }
 
 
-
     void dockingPos(const kobuki_msgs::PowerSystemEvent::ConstPtr& state){
         //todo add doskPos = NULLs
+        ROS_INFO("Charge info received.");
         if(state->event == state->PLUGGED_TO_DOCKBASE || state->event == state->CHARGE_COMPLETED){
+            docking = true;
             dockPos = currentPos;
             std::cout << "Lade pois" << std::endl;
+        }else if (state->event == state->PLUGGED_TO_ADAPTER || state->event == state->UNPLUGGED){
+            docking = false;
         }
+       // ROS_INFO(std::to_string(state->event));
+        
     }
     void position(const nav_msgs::Odometry::ConstPtr &msg){
         //save position 
         currentPos = msg->pose.pose.position;
+        currentPos.header.frame_id = msg->header.frame_id;
+        currentPos.header.stamp = ros::Time::now();
+        
     }
 
+    void chargingState(const kobuki_msgs::SensorState::ConstPtr &msg){
+        _chargingState=(charger_state)msg->charger;
+    }
+
+
+    bool returnToDock(std_srvs::SetBool::Request &req,
+                        std_srvs::SetBool::Response &res){
+                            if(xPos.point.x || xPos.point.y || xPos.point.z){
+                                move_base_msgs::MoveBaseGoal goal;
+                                goal.target_pose.header.frame_id = xPos.header.frame_id;
+                                goal.target_pose.header.stamp = ros::Time::now();
+                                goal.target_pose.pose.position = xPos.point;
+                                _move_base(goal);
+                            }
+                        }
 
 };
 
