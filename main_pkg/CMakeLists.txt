@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     turtlesim
     std_msgs
+    std_srvs
     message_generation
     actionlib
     actionlib_msgs
@@ -267,11 +268,11 @@ target_link_libraries(${PROJECT_NAME}_interface
 #  ${catkin_LIBRARIES}
 #)
 
-add_executable(${PROJECT_NAME}_range_check src/range_check.cpp)
-set_target_properties(${PROJECT_NAME}_range_check PROPERTIES OUTPUT_NAME range_check PREFIX "")
-target_link_libraries(${PROJECT_NAME}_range_check
-  ${catkin_LIBRARIES}
-)
+#add_executable(${PROJECT_NAME}_range_check src/range_check.cpp)
+#set_target_properties(${PROJECT_NAME}_range_check PROPERTIES OUTPUT_NAME range_check PREFIX "")
+##target_link_libraries(${PROJECT_NAME}_range_check
+ # ${catkin_LIBRARIES}
+#)
 add_executable(${PROJECT_NAME}_server src/server.cpp)
 set_target_properties(${PROJECT_NAME}_server PROPERTIES OUTPUT_NAME server PREFIX "")
 target_link_libraries(${PROJECT_NAME}_server

@@ -14,7 +14,7 @@
 #include <main_pkg/pointStamped_srv.h>
 #include <main_pkg/reverseAction.h>
 #include <geometry_msgs/Twist.h>
-#include <std_msgs/SetBool.h>
+#include <std_srvs/SetBool.h>
 #include <nav_msgs/Odometry.h>
 //#include <rate.h>
 
@@ -37,7 +37,7 @@ class moveCommands{
     //Actions are defined
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
     
-    public:
+    protected:
     void _move_base(move_base_msgs::MoveBaseGoal goal){
         MoveBaseClient.waitForServer();
         debug("9");
@@ -54,7 +54,7 @@ class moveCommands{
 
 
 
-class MoveBase : public moveCommands
+class MoveBase :  moveCommands
 {
 private:
 
@@ -170,7 +170,7 @@ public:
         debug("7");
         goal.target_pose.header.stamp = ros::Time::now();
         debug("8");
-        _move_base(goal);
+        moveCommands::_move_base(goal);
         if (MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
             std::cout << "Reached goal: " << 1 + 1 << " OF " << length_job << std::endl;
         }
@@ -406,10 +406,9 @@ class Reverse : public moveCommands
     }
     void position(const nav_msgs::Odometry::ConstPtr &msg){
         //save position 
-        currentPos = msg->pose.pose.position;
+        currentPos.point = msg->pose.pose.position;
         currentPos.header.frame_id = msg->header.frame_id;
         currentPos.header.stamp = ros::Time::now();
-        
     }
 
     void chargingState(const kobuki_msgs::SensorState::ConstPtr &msg){
@@ -424,7 +423,7 @@ class Reverse : public moveCommands
                                 goal.target_pose.header.frame_id = xPos.header.frame_id;
                                 goal.target_pose.header.stamp = ros::Time::now();
                                 goal.target_pose.pose.position = xPos.point;
-                                _move_base(goal);
+                                moveCommands::_move_base(goal);
                             }
                         }
 

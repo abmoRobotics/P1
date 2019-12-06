@@ -36,8 +36,7 @@ private:
 public:
 private:
     //Function that removes redundant information from console
-    void _clearScreen() { std::cout << std::string(20, '\n'); }
-
+    void _menuLines(){std::cout << "------------------------------------" << std::endl;}
     //Menu that shows when trying to create a route
         enum server_state
     {
@@ -51,11 +50,12 @@ private:
     };
     void _createMenu()
     {
-        _clearScreen();
+        system("clear");
         int selection = 0;
         std::string nameTask;
-        std::cout << "-----------------------\nEnter name for task:" << std::endl;
-        std::cin >> nameTask;
+        std::cout << "-----------------------\nEnter name for task: ";
+        std::cin.ignore();
+        std::getline(std::cin, nameTask);
         //Function for sending name of task to server nameTask(nameTask);
         srv_add_task.request.name = nameTask;
         bool e = client_add_task.call(srv_add_task);
@@ -65,7 +65,7 @@ private:
 
         while (selection != 1)
         {
-            _clearScreen();
+            system("clear");
             std::cout << " -----------------------\n1. Stop creating task and go back to menu" << std::endl;
             std::cout << "Enter: ";
             std::cin >> selection;
@@ -79,14 +79,17 @@ private:
 
     void _automaticMapping()
     {
-        char c;
-        _clearScreen();
+        std::string c;
+        system("clear");
         //service start automatic mapping
         srv_toggle_explore.request.data = true;
         client_toggle_explore.call(srv_toggle_explore);
+        _menuLines();
         std::cout << "Automatic mapping started" << std::endl;
+        _menuLines();
         std::cout << "Press any key to return: ";
-        std::cin >> c;
+        std::cin.ignore();
+        std::getline(std::cin, c);
         srv_toggle_explore.request.data = false;
         client_toggle_explore.call(srv_toggle_explore);
     }
@@ -124,32 +127,35 @@ private:
             {
                 std::cout << i << ". " << srv_recieve_task_name.response.task_names[i] << std::endl;
             }
+            std::cin >> srv_server_mode.request.mode;
+            client_turtlebot_job.call(srv_server_mode);
         }
         else
         {
-            std::cout << "FAIL";
+            std::cout << "[ERROR] - No tasks defined: Press any key to return: " << std::endl;
+            std::cin.ignore();
+            std::cin.get();
         }
 
-        std::cin >> srv_server_mode.request.mode;
-        client_turtlebot_job.call(srv_server_mode);
+        
     }
 
     void _kitchenPoint(){
-        char c;
-        _clearScreen();
+        system("clear");
         _server_mode(kitchenPos);
-        std::cout << "Insert kitchen point" << std::endl;
-        std::cin >> c; 
+        std::cout << "Insert kitchen point - press any key to return" << std::endl;
+        std::cin.ignore();
+        std::cin.get();
 
         _server_mode(inactivate);
     }
 
     void _chargingPoint(){
-        char c;
-        _clearScreen();
+        system("clear");
         _server_mode(chargingPos);
-        std::cout << "Insert charging point" << std::endl;
-        std::cin >> c; 
+        std::cout << "Insert charging point - press any key to return" << std::endl;
+        std::cin.ignore();
+        std::cin.get();
 
         _server_mode(inactivate);
 
@@ -174,7 +180,9 @@ private:
             break;
         }
         client_server_mode.call(srv_server_mode);
-        std::cout << "Server mode chaged" << s << std::endl;
+        _menuLines();
+        std::cout << "Server mode chaged " << s << std::endl;
+        _menuLines();
     }
     void _menu()
     {
@@ -182,7 +190,7 @@ private:
 
         while (c != 0)
         {
-            _clearScreen();
+            system("clear");
             std::cout << "----------------------------" << std::endl;
             std::cout << "1. Create route for Turtlebot" << std::endl;
             std::cout << "2. Send task for Turtlebot to perform" << std::endl;
