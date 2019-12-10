@@ -64,7 +64,6 @@ private:
         inactivate,
         taskCoordinates,
         kitchenPos,
-        chargingPos
         //0 = inactivate no points can be stored
         //1 = points are stored to the task array
         //2 = points are stored to the kitchen position
