@@ -48,7 +48,7 @@ private:
         //1 = points are stored to the task array
         //2 = points are stored to the kitchen position
     };
-    void _createMenu()
+    void _createTask()
     {
         system("clear");
         int selection = 0;
@@ -161,24 +161,9 @@ private:
 
     }
     void _server_mode(server_state s){
-        switch (s)
-        {
-        case inactivate:
-            srv_server_mode.request.mode = (int)inactivate;
-            break;
-        case taskCoordinates:
-            srv_server_mode.request.mode = (int)taskCoordinates;
-            break;
-        case kitchenPos:
-             srv_server_mode.request.mode = (int)kitchenPos;   
-            break;
-        case chargingPos:
-            srv_server_mode.request.mode = (int)chargingPos;
-            break;
-        default:
-            srv_server_mode.request.mode = (int)inactivate;
-            break;
-        }
+
+	srv_server_mode.request.mode = (int)s;
+
         client_server_mode.call(srv_server_mode);
         _menuLines();
         std::cout << "Server mode chaged " << s << std::endl;
@@ -209,7 +194,7 @@ private:
 
             switch (c){
                 case 1:
-                    _createMenu();
+                    _createTask();
                     break;
                 case 2:
                     _sendTask();
