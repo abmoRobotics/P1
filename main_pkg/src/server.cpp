@@ -138,7 +138,7 @@ private:
 
 
 public:
-    void recieve_points(const geometry_msgs::PointStamped::ConstPtr &msg)
+    void receive_points(const geometry_msgs::PointStamped::ConstPtr &msg)
     {
         
         switch (server_mode)
@@ -148,9 +148,6 @@ public:
             break;
         case kitchenPos:
             insert_kitchen(msg);
-            break;
-        case chargingPos:
-            insert_charging(msg);
             break;
         default:
             ROS_INFO("SERVER: CANNOT INSERT POINT");
@@ -273,7 +270,7 @@ int main(int argc, char *argv[])
     ros::ServiceServer server7 = nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, &server_instance);
     ros::ServiceServer server8 = nh.advertiseService("get_pose_charging", &Server::get_pose_charging, &server_instance);
         //subsribers
-    ros::Subscriber click_sub = nh.subscribe("clicked_point", 100, &Server::recieve_points, &server_instance);
+    ros::Subscriber click_sub = nh.subscribe("clicked_point", 100, &Server::receive_points, &server_instance);
     
     ros::Rate loop_rate(1);
     while (ros::ok())
