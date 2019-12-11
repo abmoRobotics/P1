@@ -3,6 +3,7 @@
 #include <main_pkg/routeName.h>
 #include <main_pkg/serverMode.h>
 #include <main_pkg/recieve_task_name.h>
+#include <main_pkg/navMode.h>
 #include <string>
 #include <vector>
 #include <std_srvs/SetBool.h>
@@ -24,6 +25,7 @@ private:
     ros::ServiceClient client_turtlebot_job = _nh.serviceClient<main_pkg::serverMode>("turtlebot_job");
     ros::ServiceClient client_toggle_explore = _nh.serviceClient<std_srvs::SetBool>("toggle_explore");
     ros::ServiceClient client_show_maps = _nh.serviceClient<std_srvs::SetBool>("show_maps");
+    ros::ServiceClient client_change_navMode = _nh.serviceClient<main_pkg::navMode>("change_navMode");
 
     //srv messages
     main_pkg::routeName srv_add_task;
@@ -32,6 +34,15 @@ private:
     std_srvs::Empty srv_show_maps;
     std_srvs::SetBool srv_toggle_explore;
     main_pkg::recieve_task_name srv_recieve_task_name;
+    main_pkg::navMode srv_change_navMode;
+
+    //A enum with 2 possibilities defined
+    enum navMode
+    {
+        automatic,
+        operation
+    };
+    navMode _navMode = operation;
 
 public:
 private:
@@ -149,6 +160,19 @@ private:
         _server_mode(inactivate);
     }
 
+    void _change_navMode(){
+	if(_navMode == automatic)
+		_navMode = operation;
+	else
+		_navMode = automatic;
+
+
+        srv_change_navMode.request.mode = _navMode;
+        client_change_navMode.call(srv_change_navMode);
+
+	std::cout <<"Changing navmode to: " << _navMode << std::endl;
+    }
+
     /*void _chargingPoint(){ //Bliver ikke brugt længere
         system("clear");
         _server_mode(chargingPos);
@@ -178,14 +202,16 @@ private:
             std::cout << "----------------------------" << std::endl;
             std::cout << "1. Create route for Turtlebot" << std::endl;
             std::cout << "2. Send task for Turtlebot to perform" << std::endl;
-            std::cout << "3. Start automatic mapping" << std::endl;
-            std::cout << "4. Insert kitchen point" << std::endl;
-            std::cout << "5. Save map" << std::endl;
-            std::cout << "6. Load map" << std::endl;
+            std::cout << "3. Change navigation mode. Current: "; 
+	    std::string mode = "Operation"; if(_navMode==0) mode="Automatic"; std::cout << mode << std::endl;
+            std::cout << "4. Start automatic mapping" << std::endl;
+            std::cout << "5. Insert kitchen point" << std::endl;
+            std::cout << "6. Save map" << std::endl;
+            std::cout << "7. Load map" << std::endl;
             std::cout << "----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
-            while (1 > c > 6)
+            while (1 > c > 7)
             {
                 std::cin >> c;
             }
@@ -197,16 +223,19 @@ private:
                 case 2:
                     _sendTask();
                     break;
-                case 3:
+		case 3:
+		    _change_navMode();
+		    break;
+                case 4:
                     _automaticMapping();
                     break;
-                case 4:
+                case 5:
                     _kitchenPoint();
                     break;
-                case 5:
+                case 6:
                     _saveMap();
                     break;
-                case 6:
+                case 7:
                     _showMaps();
                     break;
 

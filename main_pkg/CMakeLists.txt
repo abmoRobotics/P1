@@ -75,6 +75,7 @@ find_package(catkin REQUIRED COMPONENTS
  # turtlebot_job.srv
   poseArray_srv.srv
   pointStamped_srv.srv
+  navMode.srv
  )
 
 ## Generate actions in the 'action' folder
