@@ -69,16 +69,25 @@ private:
         //2 = points are stored to the kitchen position
     };
     int server_mode = 0;
-
+    /**
+     * Insert point in task vector
+     *
+     * The recived point is stored in a PoseStamped datatype, which is then pushed into a PoseArray.
+     * 
+     * If the server mode is 0 do nothing with the coordinate.
+     *
+     * @param "msg" contains the point used when creating routes.
+     */
     void insert_point(const geometry_msgs::PointStamped::ConstPtr msg)
     {
         geometry_msgs::PoseStamped pose;
-        pose.pose.position.x = msg->point.x;
-        pose.pose.position.y = msg->point.y;
-        pose.pose.position.z = msg->point.z;
-        pose.pose.orientation.w = 1.0;
-        savedTasks.poseArray.header.stamp = ros::Time::now();
-        savedTasks.poseArray.header.frame_id = msg->header.frame_id;
+    
+        pose.pose.position.x = msg->point.x;    
+        pose.pose.position.y = msg->point.y;    
+        pose.pose.position.z = msg->point.z;    
+        pose.pose.orientation.w = 1.0;          
+        savedTasks.poseArray.header.stamp = ros::Time::now();   
+        savedTasks.poseArray.header.frame_id = msg->header.frame_id;    
         savedTasks.poseArray.poses.push_back(pose.pose);
 
         std::cout << "punkt: " << savedTasks.poseArray.poses[i] << std::endl;
@@ -95,6 +104,7 @@ private:
 
         std::cout << "Kitchen point:" << pose_kitchen.point << std::endl;
     }
+
     void insert_charging(const geometry_msgs::PointStamped::ConstPtr msg)
     {
         pose_charging.point.x = msg->point.x;
@@ -138,23 +148,25 @@ private:
 
 
 public:
+    /**
+     * Process Rviz points depending on the server mode.
+     *
+     * If the server mode is 1, points will be inserted in a vector using insert_point().
+     * if the server mode is 2, points will be inserted as the pose for the kitchen using insert_kitchen().
+     * If the server mode is 0 do nothing with the coordinate.
+     *
+     * @param &msg contains the point used when creating routes and kitchen points. 
+     */
     void recieve_points(const geometry_msgs::PointStamped::ConstPtr &msg)
     {
-        
-        switch (server_mode)
-        {
-        case taskCoordinates: //Insert point in task
-            insert_point(msg);
-            break;
-        case kitchenPos:
-            insert_kitchen(msg);
-            break;
-        case chargingPos:
-            insert_charging(msg);
-            break;
-        default:
+        if(server_mode == taskCoordinates){
+            insert_point(msg);                  
+        }
+        else if(server_mode == kitchenPos){
+            insert_kitchen(msg);                
+        }
+        else{
             ROS_INFO("SERVER: CANNOT INSERT POINT");
-            break;
         }
     }
 
