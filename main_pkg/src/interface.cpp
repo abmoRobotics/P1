@@ -42,13 +42,12 @@ private:
     {
         inactivate,
         taskCoordinates,
-        kitchenPos,
-        chargingPos
+        kitchenPos
         //0 = inactivate no points can be stored
         //1 = points are stored to the task array
         //2 = points are stored to the kitchen position
     };
-    void _createMenu()
+    void _createTask()
     {
         system("clear");
         int selection = 0;
@@ -150,7 +149,7 @@ private:
         _server_mode(inactivate);
     }
 
-    void _chargingPoint(){
+    /*void _chargingPoint(){ //Bliver ikke brugt længere
         system("clear");
         _server_mode(chargingPos);
         std::cout << "Insert charging point - press any key to return" << std::endl;
@@ -159,26 +158,11 @@ private:
 
         _server_mode(inactivate);
 
-    }
+    }*/
     void _server_mode(server_state s){
-        switch (s)
-        {
-        case inactivate:
-            srv_server_mode.request.mode = (int)inactivate;
-            break;
-        case taskCoordinates:
-            srv_server_mode.request.mode = (int)taskCoordinates;
-            break;
-        case kitchenPos:
-             srv_server_mode.request.mode = (int)kitchenPos;   
-            break;
-        case chargingPos:
-            srv_server_mode.request.mode = (int)chargingPos;
-            break;
-        default:
-            srv_server_mode.request.mode = (int)inactivate;
-            break;
-        }
+
+	srv_server_mode.request.mode = (int)s;
+
         client_server_mode.call(srv_server_mode);
         _menuLines();
         std::cout << "Server mode chaged " << s << std::endl;
@@ -196,20 +180,19 @@ private:
             std::cout << "2. Send task for Turtlebot to perform" << std::endl;
             std::cout << "3. Start automatic mapping" << std::endl;
             std::cout << "4. Insert kitchen point" << std::endl;
-            std::cout << "5. Insert charging station point" << std::endl;
-            std::cout << "6. Save map" << std::endl;
-            std::cout << "7. Load map" << std::endl;
+            std::cout << "5. Save map" << std::endl;
+            std::cout << "6. Load map" << std::endl;
             std::cout << "----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
-            while (1 > c > 5)
+            while (1 > c > 6)
             {
                 std::cin >> c;
             }
 
             switch (c){
                 case 1:
-                    _createMenu();
+                    _createTask();
                     break;
                 case 2:
                     _sendTask();
@@ -221,12 +204,9 @@ private:
                     _kitchenPoint();
                     break;
                 case 5:
-                    _chargingPoint();
-                    break;
-                case 6:
                     _saveMap();
                     break;
-                case 7:
+                case 6:
                     _showMaps();
                     break;
 
