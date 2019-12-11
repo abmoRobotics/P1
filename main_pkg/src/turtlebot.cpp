@@ -13,10 +13,13 @@
 #include <kobuki_msgs/PowerSystemEvent.h>
 #include <main_pkg/pointStamped_srv.h>
 #include <main_pkg/reverseAction.h>
+#include <main_pkg/navMode.h>
 #include <geometry_msgs/Twist.h>
 #include <std_srvs/SetBool.h>
 #include <nav_msgs/Odometry.h>
 //#include <rate.h>
+
+
 
 void debug(std::string a)
 {
@@ -61,8 +64,6 @@ class moveCommands{
     moveCommands() : MoveBaseClient("move_base",true){}     //MoveBaseClient is initialized
 };
 
-
-
 class MoveBase :  moveCommands
 {
 private:
@@ -82,6 +83,8 @@ private:
     ros::ServiceClient _client_receive_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");                   //Service for recieving the next array of points(a task) from the server
     ros::ServiceClient _client_receive_pose_kitchen = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_kitchen");     //Service for getting the pose of the kitchen point
     ros::ServiceClient _client_receive_pose_charging = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_charging");   //Service for getting the pose of the charging point
+    ros::ServiceClient _client_receive_navMode = nh.serviceClient<main_pkg::navMode>("get_navMode");
+    
     //Subscribers
     ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_button_event, this);                    //
     ros::Subscriber batterySub = nh.subscribe("/mobile_base/sensors/core", 1, &MoveBase::batteryCallback, this);            //
@@ -89,6 +92,7 @@ private:
     main_pkg::poseArray_srv _srv_receive_pose_array;
     main_pkg::pointStamped_srv _srv_receive_pose_kitchen;
     main_pkg::pointStamped_srv _srv_receive_pose_charging;
+    main_pkg::navMode _srv_receive_navMode;
 
 
     //Publisher for markers
@@ -150,21 +154,22 @@ public:
 
     void _send_task()
     {
+	_get_navMode(); //Get navmode from server
         
-    switch (_navMode)
-    {
-    case navMode::automatic:
-        debug("Auto");
-            for (int i = 0; i < length_job; i++){
-            _send_goal(_srv_receive_pose_array.response);}
-        break;
-    case navMode::operation:
-        debug("operation");
-        _send_goal(_srv_receive_pose_array.response);
-        break;
-    default:
-        break;
-    }
+	switch (_navMode)
+	{
+		case navMode::automatic:
+		debug("Auto");
+		    for (int i = 0; i < length_job; i++){
+		    _send_goal(_srv_receive_pose_array.response);}
+		break;
+		case navMode::operation:
+		debug("operation");
+		_send_goal(_srv_receive_pose_array.response);
+		break;
+		default:
+		break;
+	}
 
     }  
 
@@ -266,15 +271,19 @@ public:
     {
 	//debug("Checking battery");
         float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate pct
-	//ROS_INFO("pct: %f", batterypct);
+	ROS_INFO("pct: %f", batterypct);
             
-        if(int (current_dock_state) == 0 && batterypct < minimum_battery_pct){ //Not in dock and under minimal%
+        if(current_dock_state == 0 && batterypct < minimum_battery_pct){ //Not in dock and under minimal%
             debug("Battery is under minimal charge");
 
 	    _moveToDock();
 
             return true;
         }	
+	//In dock and under minimal%
+	else if(current_dock_state == 6 && batterypct < minimum_battery_pct){
+            return true;
+	}
         return false;
     }
 
@@ -288,13 +297,14 @@ public:
 
         main_pkg::pointStamped_srv::Response chargingPoint = _srv_receive_pose_charging.response;
 
+
         if(chargingPoint.pose.point.x != 0 || chargingPoint.pose.point.y != 0 || chargingPoint.pose.point.z != 0){
 	        ROS_INFO("Charging point found!");	
 	        _send_goal(chargingPoint);
             system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimalt
         }
         else{		
-            ROS_INFO("There is no point set for charging");		
+            ROS_INFO("Charging point not set");		
         }
     }
 
@@ -314,6 +324,15 @@ public:
         else{
             ROS_INFO("Kitchen point not found");
         }
+    }
+
+    //Get navmode from server
+    void _get_navMode(){
+	_client_receive_navMode.call(_srv_receive_navMode);
+
+	_navMode = static_cast<navMode>(_srv_receive_navMode.response.mode);
+	
+	std::cout << "Navmode is: " << _navMode << std::endl;
     }
 
 public:
@@ -343,7 +362,6 @@ class Reverse : public moveCommands
     ros::Subscriber subOdom = _nh.subscribe("/odom", 0, &Reverse::position, this);
     ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",10);
     geometry_msgs::PointStamped currentPos, xPos, dockPos;
-    
     
     actionlib::SimpleActionServer<main_pkg::reverseAction> _as;     
     std::string _actionName;                                        
@@ -447,10 +465,7 @@ int main(int argc, char *argv[])
     char c;
     MoveBase e;
     Reverse r("mover");
-    debug("1");
-    debug("2");
-    
-    debug("3");
+
     ros::Rate loop_rate(1);
     while (ros::ok)
     {

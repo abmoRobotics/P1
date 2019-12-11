@@ -17,6 +17,7 @@
 #include <main_pkg/routeName.h>
 #include <main_pkg/recieve_task_name.h>
 #include <main_pkg/poseArray_srv.h>
+#include <main_pkg/navMode.h>
 #include <string.h>
 #include <std_srvs/Empty.h>
 #include <std_srvs/SetBool.h>
@@ -69,6 +70,14 @@ private:
         //2 = points are stored to the kitchen position
     };
     int server_mode = 0;
+
+    //A enum with 2 possibilities defined
+    enum navMode
+    {
+        automatic,
+        operation
+    };
+    navMode _navMode = operation;
 
     void insert_point(const geometry_msgs::PointStamped::ConstPtr msg)
     {
@@ -175,6 +184,8 @@ public:
         return 1;
     }
 
+
+
     bool stop_task(std_srvs::Empty::Request &req,
                    std_srvs::Empty::Response &res)
     {
@@ -250,6 +261,19 @@ public:
         return 1;
     }
 
+    bool change_navMode(main_pkg::navMode::Request &req,
+			main_pkg::navMode::Response &res)
+    {
+	_navMode = static_cast<navMode>(req.mode);
+	std::cout << "Nav mode changed to: " << _navMode << std::endl;
+	return 1;
+    }
+
+    bool get_navMode(main_pkg::navMode::Request &req, main_pkg::navMode::Response &res){
+	res.mode = _navMode;
+        return 1;
+    }
+
 public:
     Server() {
     }
@@ -269,6 +293,8 @@ int main(int argc, char *argv[])
     ros::ServiceServer server6 = nh.advertiseService("get_job", &Server::get_job, &server_instance);
     ros::ServiceServer server7 = nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, &server_instance);
     ros::ServiceServer server8 = nh.advertiseService("get_pose_charging", &Server::get_pose_charging, &server_instance);
+    ros::ServiceServer server9 = nh.advertiseService("change_navMode", &Server::change_navMode, &server_instance);
+    ros::ServiceServer server10 = nh.advertiseService("get_navMode", &Server::get_navMode, &server_instance);
         //subsribers
     ros::Subscriber click_sub = nh.subscribe("clicked_point", 100, &Server::receive_points, &server_instance);
     
