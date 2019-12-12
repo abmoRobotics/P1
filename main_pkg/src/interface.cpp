@@ -130,7 +130,8 @@ private:
         u_int mapNumber;
         std::cin >> mapNumber;
         std::string s = "rosrun map_server map_server ";
-        s += ops[mapNumber--];
+        mapNumber--;
+	s += ops[mapNumber];
         system(s.c_str());
         std::cout << ops[mapNumber] << " loaded." << std::endl;
         
