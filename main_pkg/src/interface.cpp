@@ -8,6 +8,9 @@
 #include <vector>
 #include <std_srvs/SetBool.h>
 #include <std_srvs/Empty.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include <actionlib/client/simple_action_client.h>
 #include <main_pkg/reverseAction.h>
 #include <std_srvs/SetBool.h>
@@ -46,6 +49,9 @@ private:
 
 public:
 private:
+
+    char sti[1023];
+    std::vector<std::string> ops;
     //Function that removes redundant information from console
     void _menuLines(){std::cout << "------------------------------------" << std::endl;}
     //Menu that shows when trying to create a route
@@ -115,13 +121,18 @@ private:
     void _showMaps()
     {
         std::cout << "Displaying list of maps. Enter the map number to load." << std::endl;
-        client_show_maps.call(srv_show_maps); 
-        std::vector<std::string> ops;
+        char st[] = {'/','h','o','m','e'};
+        traverse(st, false);
+        printf("%s\n\n", sti);
+        for(u_int i = 0; i < ops.size(); i++)
+            std::cout << i+1 << " " << ops[i] << std::endl;
+
         u_int mapNumber;
         std::cin >> mapNumber;
         std::string s = "rosrun map_server map_server ";
-        s += ops[mapNumber];
+        s += ops[mapNumber--];
         system(s.c_str());
+        std::cout << ops[mapNumber] << " loaded." << std::endl;
         
     }
 
@@ -247,6 +258,37 @@ private:
             
             
         }
+    }
+
+    void traverse(char *fn, bool canAdd) 
+    {
+        DIR *dir;
+        struct dirent *entry;
+        char path[1023];
+        struct stat info;
+
+        if ((dir = opendir(fn)) != NULL){
+            while ((entry = readdir(dir)) != NULL) {
+                std::string s = entry->d_name;
+                if (s.find(".pgm") != std::string::npos && !canAdd){
+                    strncpy(sti,fn,1025);
+                    traverse(fn, true);
+                    return;
+                }
+                else if (entry->d_name[0] != '.') {
+                    if(canAdd && s.find(".yaml") != std::string::npos)  
+                        ops.push_back(entry->d_name);
+                    strcpy(path, fn);
+                    strcat(path, "/");
+                    strcat(path, entry->d_name);
+                    stat(path, &info);
+                    if (S_ISDIR(info.st_mode))  
+                        traverse(path, false);
+                }
+            }
+            closedir(dir);
+        }
+        
     }
 
 public:
