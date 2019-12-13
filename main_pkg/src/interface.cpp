@@ -14,6 +14,8 @@
 #include <actionlib/client/simple_action_client.h>
 #include <main_pkg/reverseAction.h>
 #include <std_srvs/SetBool.h>
+#include <sstream>
+#include <kobuki_msgs/SensorState.h>
 
 class Menu
 {
@@ -29,6 +31,7 @@ private:
     ros::ServiceClient client_toggle_explore = _nh.serviceClient<std_srvs::SetBool>("toggle_explore");
     ros::ServiceClient client_show_maps = _nh.serviceClient<std_srvs::SetBool>("show_maps");
     ros::ServiceClient client_change_navMode = _nh.serviceClient<main_pkg::navMode>("change_navMode");
+
 
     //srv messages
     main_pkg::routeName srv_add_task;
@@ -195,6 +198,7 @@ private:
         _server_mode(inactivate);
 
     }*/
+
     void _server_mode(server_state s){
 
 	srv_server_mode.request.mode = (int)s;
@@ -214,13 +218,15 @@ private:
             std::cout << "----------------------------" << std::endl;
             std::cout << "1. Create route for Turtlebot" << std::endl;
             std::cout << "2. Send task for Turtlebot to perform" << std::endl;
-            std::cout << "3. Change navigation mode. Current: "; 
-	    std::string mode = "Operation"; if(_navMode==0) mode="Automatic"; std::cout << mode << std::endl;
+            std::cout << "3. Change operational mode. Current: "; 
+	    std::string mode = "Manual"; if(_navMode==0) mode="Automatic"; std::cout << mode << std::endl;
             std::cout << "4. Start automatic mapping" << std::endl;
             std::cout << "5. Insert kitchen point" << std::endl;
             std::cout << "6. Save map" << std::endl;
             std::cout << "7. Load map" << std::endl;
             std::cout << "----------------------------" << std::endl;
+	    std::cout << "B0: Start- or continue route \nB1: Move to kitchen \nB2: Move to dock" << std::endl;
+	    std::cout << "\n----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
             while (1 > c > 7)
