@@ -10,8 +10,6 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <iostream>
 #include <vector>
-#include <main_pkg/poseArray.h>
-#include <main_pkg/poseTasks.h>
 #include <main_pkg/pointStamped_srv.h>
 #include <main_pkg/serverMode.h>
 #include <main_pkg/routeName.h>
