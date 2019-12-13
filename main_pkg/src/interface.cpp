@@ -122,6 +122,7 @@ private:
     {
         std::cout << "Displaying list of maps. Enter the map number to load." << std::endl;
         char st[] = {'/','h','o','m','e'};
+	ops.clear();
         traverse(st, false);
         printf("%s\n\n", sti);
         for(u_int i = 0; i < ops.size(); i++)
@@ -267,12 +268,11 @@ private:
         struct dirent *entry;
         char path[1023];
         struct stat info;
-
         if ((dir = opendir(fn)) != NULL){
             while ((entry = readdir(dir)) != NULL) {
                 std::string s = entry->d_name;
                 if (s.find(".pgm") != std::string::npos && !canAdd){
-                    strncpy(sti,fn,1025);
+                    strncpy(sti,fn,1023);
                     traverse(fn, true);
                     return;
                 }
