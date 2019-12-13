@@ -37,6 +37,10 @@ void debug(std::string a)
 }
 
 
+//Global variable as it is used in two classes
+//Location in front of charging station
+geometry_msgs::PointStamped chargingPoint;
+
 /**
  * Class for moving the turtlebot is defined.
  *
@@ -63,8 +67,6 @@ class moveCommands{
     }
     moveCommands() : MoveBaseClient("move_base",true){}     //MoveBaseClient is initialized
 
-    //Location in front of charging station
-    geometry_msgs::PointStamped xPos;
 };
 
 class MoveBase :  moveCommands
@@ -103,13 +105,10 @@ private:
         "route_markers", 1);
     //Variables
     int length_job = 0;
-    int minimum_battery_pct = 95; //Battery % when it returns to dock
+    int minimum_battery_pct = 98; //Battery % when it returns to dock
     int kobuki_max_charge = 163; //Battery volt at full charge
     int current_battery = kobuki_max_charge; //Current battery in volt
     int current_dock_state = 2;
-    protected:
-    //Location in front of charging station
-    geometry_msgs::PointStamped xPos;
 public:
     int job_size()
     {
@@ -296,15 +295,17 @@ public:
 
 
         debug("Moving to the dock");
+
+	std::cout << "Point is: " << chargingPoint.point << std::endl;
         
-        if(xPos.point.x || xPos.point.y || xPos.point.z){
+        if(chargingPoint.point.x != 0 || chargingPoint.point.y != 0 || chargingPoint.point.z != 0){
             move_base_msgs::MoveBaseGoal goal;
-            goal.target_pose.header.frame_id = xPos.header.frame_id;
+            goal.target_pose.header.frame_id = chargingPoint.header.frame_id;
             goal.target_pose.header.stamp = ros::Time::now();
-            goal.target_pose.pose.position = xPos.point;
+            goal.target_pose.pose.position = chargingPoint.point;
             ROS_INFO("Charging point found!");
             moveCommands::_move_base(goal);
-            system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimalt
+            system("roslaunch kobuki_auto_docking activate.launch --screen"); //Hvis den ikke finder docken, slukker programmet :(
         }else{		
             ROS_INFO("There is no point set for charging");		
         }
@@ -379,13 +380,14 @@ class Reverse : public moveCommands
     ros::Subscriber sub1 = _nh.subscribe("/mobile_base/sensors/core", 0, &Reverse::chargingState, this);
     ros::Subscriber subOdom = _nh.subscribe("/odom", 0, &Reverse::position, this);
     ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",10);
-    geometry_msgs::PointStamped currentPos, dockPos;
+    geometry_msgs::PointStamped currentPos, dockPos, xPos;
     
     actionlib::SimpleActionServer<main_pkg::reverseAction> _as;     
     std::string _actionName;                                        
     main_pkg::reverseFeedback _feedback;                            
     main_pkg::reverseResult _result;                                
-    bool docking;                                                   
+    bool docking;  
+                                                 
     public:
     Reverse(std::string name) :
         _as(_nh, name, boost::bind(&Reverse::executeCB, this, _1), false),
@@ -429,6 +431,8 @@ class Reverse : public moveCommands
             _result.result = _feedback.status;
             xPos = currentPos;
             _as.setSucceeded(_result);
+	    std::cout << "CHARGING POINT SET TO: " << xPos << std::endl;
+	    chargingPoint = xPos; //Set the movebase class' xPos to the same 
         }
 
         
@@ -464,7 +468,9 @@ class Reverse : public moveCommands
 
     bool returnToDock(std_srvs::SetBool::Request &req,
                         std_srvs::SetBool::Response &res){
+			    debug("Return to dock");
                             if(xPos.point.x || xPos.point.y || xPos.point.z){
+				debug("xPos exists!");
                                 move_base_msgs::MoveBaseGoal goal;
                                 goal.target_pose.header.frame_id = xPos.header.frame_id;
                                 goal.target_pose.header.stamp = ros::Time::now();
@@ -482,7 +488,7 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "caterbot");
     char c;
     MoveBase e;
-    Reverse r("mover");
+    Reverse r("mover"); //movebase as parameter, to access the movebase variables from reverse
 
     ros::Rate loop_rate(1);
     while (ros::ok)
