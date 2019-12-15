@@ -227,7 +227,8 @@ private:
             std::cout << "7. Load map" << std::endl;
             std::cout << "----------------------------" << std::endl;
 	    std::cout << "B0: Start- or continue route \nB1: Move to kitchen \nB2: Move to dock" << std::endl;
-	    std::cout << "\n----------------------------" << std::endl;
+        std::cout << "Press and hold B0 for minimum 3 sec to clear current route" << std::endl;
+	    std::cout << "----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
             while (1 > c > 7)
