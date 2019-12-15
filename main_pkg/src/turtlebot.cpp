@@ -49,11 +49,6 @@ class moveCommands
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
 protected:
-    /*x
-     * Sum numbers in a vector.
-     *
-     * @param MoveBaseGoal whose value define the goal for the turtlebot.
-     */
     void _move_base(move_base_msgs::MoveBaseGoal goal)
     {
         goal.target_pose.pose.orientation.w = 1.0;
@@ -135,8 +130,8 @@ public:
         }
     }
 
-    double B0 = 0;
 
+    double B0 = 0;
     void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
     {
         if (msg->state == msg->PRESSED)
@@ -146,7 +141,6 @@ public:
                 B0 = ros::Time::now().toSec();
                 std::cout << "Time is: " << B0 << std::endl;
             }
-
             else if (msg->button == msg->Button1)
             {
                 _moveToKitchen();
@@ -301,7 +295,6 @@ public:
 
     bool battery_check() //Returns true if it needs to recharge
     {
-        //debug("Checking battery");
         float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate pct
         ROS_INFO("pct: %f", batterypct);
 
@@ -323,7 +316,6 @@ public:
 
     void _moveToDock()
     {
-
         debug("Moving to the dock");
 
         std::cout << "Point is: " << chargingPoint.point << std::endl;
@@ -336,27 +328,12 @@ public:
             goal.target_pose.pose.position = chargingPoint.point;
             ROS_INFO("Charging point found!");
             moveCommands::_move_base(goal);
-            system("roslaunch kobuki_auto_docking activate.launch --screen"); //Hvis den ikke finder docken, slukker programmet :(
+            system("roslaunch kobuki_auto_docking activate.launch --screen");
         }
         else
         {
             ROS_INFO("There is no point set for charging");
         }
-
-        /*         //Get point 
-        _client_receive_pose_charging.call(_srv_receive_pose_charging);
-
-        main_pkg::pointStamped_srv::Response chargingPoint = _srv_receive_pose_charging.response;
-
-
-        if(chargingPoint.pose.point.x != 0 || chargingPoint.pose.point.y != 0 || chargingPoint.pose.point.z != 0){
-	        ROS_INFO("Charging point found!");	
-	        _send_goal(chargingPoint);
-            system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimalt
-        }
-        else{		
-            ROS_INFO("There is no point set for charging");		
-        } */
     }
 
     void _moveToKitchen()
@@ -532,7 +509,7 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "caterbot");
     char c;
     MoveBase e;
-    Reverse r("mover"); //movebase as parameter, to access the movebase variables from reverse
+    Reverse r("mover");
 
     ros::Rate loop_rate(1);
     while (ros::ok)
