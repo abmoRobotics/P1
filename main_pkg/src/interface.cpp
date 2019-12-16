@@ -8,9 +8,14 @@
 #include <vector>
 #include <std_srvs/SetBool.h>
 #include <std_srvs/Empty.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include <actionlib/client/simple_action_client.h>
 #include <main_pkg/reverseAction.h>
 #include <std_srvs/SetBool.h>
+#include <sstream>
+#include <kobuki_msgs/SensorState.h>
 
 class Menu
 {
@@ -26,6 +31,7 @@ private:
     ros::ServiceClient client_toggle_explore = _nh.serviceClient<std_srvs::SetBool>("toggle_explore");
     ros::ServiceClient client_show_maps = _nh.serviceClient<std_srvs::SetBool>("show_maps");
     ros::ServiceClient client_change_navMode = _nh.serviceClient<main_pkg::navMode>("change_navMode");
+
 
     //srv messages
     main_pkg::routeName srv_add_task;
@@ -46,6 +52,9 @@ private:
 
 public:
 private:
+
+    char sti[1023];
+    std::vector<std::string> ops;
     //Function that removes redundant information from console
     void _menuLines(){std::cout << "------------------------------------" << std::endl;}
     //Menu that shows when trying to create a route
@@ -115,13 +124,20 @@ private:
     void _showMaps()
     {
         std::cout << "Displaying list of maps. Enter the map number to load." << std::endl;
-        client_show_maps.call(srv_show_maps); 
-        std::vector<std::string> ops;
+        char st[] = {'/','h','o','m','e'};
+	ops.clear();
+        traverse(st, false);
+        printf("%s\n\n", sti);
+        for(u_int i = 0; i < ops.size(); i++)
+            std::cout << i+1 << " " << ops[i] << std::endl;
+
         u_int mapNumber;
         std::cin >> mapNumber;
         std::string s = "rosrun map_server map_server ";
-        s += ops[mapNumber];
+        mapNumber--;
+	s += ops[mapNumber];
         system(s.c_str());
+        std::cout << ops[mapNumber] << " loaded." << std::endl;
         
     }
 
@@ -183,6 +199,7 @@ private:
         _server_mode(inactivate);
 
     }*/
+
     void _server_mode(server_state s){
 
 	srv_server_mode.request.mode = (int)s;
@@ -202,13 +219,16 @@ private:
             std::cout << "----------------------------" << std::endl;
             std::cout << "1. Create route for Turtlebot" << std::endl;
             std::cout << "2. Send task for Turtlebot to perform" << std::endl;
-            std::cout << "3. Change navigation mode. Current: "; 
-	    std::string mode = "Operation"; if(_navMode==0) mode="Automatic"; std::cout << mode << std::endl;
+            std::cout << "3. Change operational mode. Current: "; 
+	    std::string mode = "Manual"; if(_navMode==0) mode="Automatic"; std::cout << mode << std::endl;
             std::cout << "4. Start automatic mapping" << std::endl;
             std::cout << "5. Insert kitchen point" << std::endl;
             std::cout << "6. Save map" << std::endl;
             std::cout << "7. Load map" << std::endl;
             std::cout << "----------------------------" << std::endl;
+	    std::cout << "B0: Start- or continue route \nB1: Move to kitchen \nB2: Move to dock" << std::endl;
+        std::cout << "Press and hold B0 for minimum 3 sec to clear current route" << std::endl;
+	    std::cout << "----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
             while (1 > c > 7)
@@ -247,6 +267,36 @@ private:
             
             
         }
+    }
+
+    void traverse(char *fn, bool canAdd) 
+    {
+        DIR *dir;
+        struct dirent *entry;
+        char path[1023];
+        struct stat info;
+        if ((dir = opendir(fn)) != NULL){
+            while ((entry = readdir(dir)) != NULL) {
+                std::string s = entry->d_name;
+                if (s.find(".pgm") != std::string::npos && !canAdd){
+                    strncpy(sti,fn,1023);
+                    traverse(fn, true);
+                    return;
+                }
+                else if (entry->d_name[0] != '.') {
+                    if(canAdd && s.find(".yaml") != std::string::npos)  
+                        ops.push_back(entry->d_name);
+                    strcpy(path, fn);
+                    strcat(path, "/");
+                    strcat(path, entry->d_name);
+                    stat(path, &info);
+                    if (S_ISDIR(info.st_mode))  
+                        traverse(path, false);
+                }
+            }
+            closedir(dir);
+        }
+        
     }
 
 public:

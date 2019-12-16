@@ -19,8 +19,6 @@
 #include <nav_msgs/Odometry.h>
 //#include <rate.h>
 
-
-
 void debug(std::string a)
 {
     enum mode
@@ -36,38 +34,47 @@ void debug(std::string a)
     }
 }
 
+//Global variable as it is used in two classes
+//Location in front of charging station
+geometry_msgs::PointStamped chargingPoint;
 
 /**
  * Class for moving the turtlebot is defined.
  *
  * This is a base class used by follwing classes: MoveBase, Reverse
  */
-class moveCommands{
+class moveCommands
+{
     //Actions is defined.
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-    
-    protected:
 
-    /*x
-     * Sum numbers in a vector.
-     *
-     * @param MoveBaseGoal whose value define the goal for the turtlebot.
-     */
-    void _move_base(move_base_msgs::MoveBaseGoal goal){
-        MoveBaseClient.waitForServer();             //Waiting until connection to action is established
+protected:
+    bool _move_base(move_base_msgs::MoveBaseGoal goal)
+    {
+        goal.target_pose.pose.orientation.w = 1.0;
+        MoveBaseClient.waitForServer(); //Waiting until connection to action is established
         debug("9");
-        MoveBaseClient.sendGoal(goal);              //When connection is established send the goal to the action server
+        MoveBaseClient.sendGoal(goal); //When connection is established send the goal to the action server
         debug("10");
-        MoveBaseClient.waitForResult();             //Pause program until result is recieved
-        debug("11");;
+        MoveBaseClient.waitForResult(); //Pause program until result is recieved
+        debug("11");
+        if (MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+            {
+                debug("12");
+                return true;
+            }
+            else
+            {
+                debug("13");
+                return false;
+            }
+        
+        ;
     }
-    moveCommands() : MoveBaseClient("move_base",true){}     //MoveBaseClient is initialized
-
-    //Location in front of charging station
-    static geometry_msgs::PointStamped xPos;
+    moveCommands() : MoveBaseClient("move_base", true) {} //MoveBaseClient is initialized
 };
 
-class MoveBase :  moveCommands
+class MoveBase : moveCommands
 {
 private:
     //A enum with 2 possibilities defined
@@ -83,33 +90,29 @@ private:
     //Actions are defined
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
     //Services are defined
-    ros::ServiceClient _client_receive_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");                   //Service for recieving the next array of points(a task) from the server
-    ros::ServiceClient _client_receive_pose_kitchen = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_kitchen");     //Service for getting the pose of the kitchen point
-    ros::ServiceClient _client_receive_pose_charging = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_charging");   //Service for getting the pose of the charging point
+    ros::ServiceClient _client_receive_pose_array = nh.serviceClient<main_pkg::poseArray_srv>("get_job");                 //Service for recieving the next array of points(a task) from the server
+    ros::ServiceClient _client_receive_pose_kitchen = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_kitchen");   //Service for getting the pose of the kitchen point
+    ros::ServiceClient _client_receive_pose_charging = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_charging"); //Service for getting the pose of the charging point
     ros::ServiceClient _client_receive_navMode = nh.serviceClient<main_pkg::navMode>("get_navMode");
-    
+
     //Subscribers
-    ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_button_event, this);                    //
-    ros::Subscriber batterySub = nh.subscribe("/mobile_base/sensors/core", 1, &MoveBase::batteryCallback, this);            //
+    ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_button_event, this);         //
+    ros::Subscriber batterySub = nh.subscribe("/mobile_base/sensors/core", 1, &MoveBase::batteryCallback, this); //
     //Custom service messages defined
     main_pkg::poseArray_srv _srv_receive_pose_array;
     main_pkg::pointStamped_srv _srv_receive_pose_kitchen;
     main_pkg::pointStamped_srv _srv_receive_pose_charging;
     main_pkg::navMode _srv_receive_navMode;
 
-
     //Publisher for markers
     ros::Publisher pub_marker = nh.advertise<visualization_msgs::MarkerArray>(
         "route_markers", 1);
     //Variables
     int length_job = 0;
-    int minimum_battery_pct = 95; //Battery % when it returns to dock
-    int kobuki_max_charge = 163; //Battery volt at full charge
+    int minimum_battery_pct = 98;            //Battery % when it returns to dock
+    int kobuki_max_charge = 163;             //Battery volt at full charge
     int current_battery = kobuki_max_charge; //Current battery in volt
     int current_dock_state = 2;
-    protected:
-    //Location in front of charging station
-    //geometry_msgs::PointStamped xPos;
 public:
     int job_size()
     {
@@ -120,7 +123,7 @@ public:
     {
         //debug("1");
         _client_receive_pose_array.call(_srv_receive_pose_array);
-        
+
         //debug("2");
         if (!_srv_receive_pose_array.response.arr.poses.empty())
         {
@@ -135,52 +138,76 @@ public:
             _delete_markers();
             //std::cout << "No jobs pending" << std::endl;
         }
-        
     }
 
-    void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg){
-        
-        if(msg->state == msg->PRESSED){
+
+    double B0 = 0;
+    void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
+    {
+        if (msg->state == msg->PRESSED)
+        {
             if (msg->button == msg->Button0)
             {
-                _send_task();
-            } else if (msg->button == msg->Button1)
+                B0 = ros::Time::now().toSec();
+                std::cout << "Time is: " << B0 << std::endl;
+            }
+            else if (msg->button == msg->Button1)
             {
                 _moveToKitchen();
-            } else if (msg->button == msg->Button2)
+            }
+
+            else if (msg->button == msg->Button2)
             {
                 _moveToDock();
             }
         }
+
+        if (msg->state == msg->RELEASED)
+        {
+            if (msg->button == msg->Button0)
+            {
+                B0 = ros::Time::now().toSec() - B0;
+                std::cout << "Time difference is: " << B0 << std::endl;
+                if (B0 < 3)
+                {
+                    _send_task();
+                }
+                else if (B0 > 3)
+                {
+                    B0 = 0;
+                    _srv_receive_pose_array.response.arr.poses.clear();
+                    std::cout << "All points in route cleared" << std::endl;
+                }
+            }
+        }
     }
-
-
-
 
     void _send_task()
     {
-	_get_navMode(); //Get navmode from server
-        
-	switch (_navMode)
-	{
-		case navMode::automatic:
-		debug("Auto");
-		    for (int i = 0; i < length_job; i++){
-		    _send_goal(_srv_receive_pose_array.response);}
-		break;
-		case navMode::operation:
-		debug("operation");
-		_send_goal(_srv_receive_pose_array.response);
-		break;
-		default:
-		break;
-	}
+        _get_navMode(); //Get navmode from server
 
-    }  
+        switch (_navMode)
+        {
+        case navMode::automatic:
+            debug("Auto");
+            for (int i = 0; i < length_job; i++)
+            {
+                _send_goal(_srv_receive_pose_array.response);
+            }
+            break;
+        case navMode::operation:
+            debug("operation");
+            _send_goal(_srv_receive_pose_array.response);
+            break;
+        default:
+            break;
+        }
+    }
 
     int _send_goal(main_pkg::poseArray_srv::Response p)
     {
-        if(!p.arr.poses.empty()){
+        if (!p.arr.poses.empty())
+        {
             move_base_msgs::MoveBaseGoal goal;
             debug("5");
             goal.target_pose.pose = p.arr.poses[0];
@@ -189,22 +216,20 @@ public:
             debug("7");
             goal.target_pose.header.stamp = ros::Time::now();
             debug("8");
-            moveCommands::_move_base(goal);
-            if (MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
-                std::cout << "Reached goal: " << 1 + 1 << " OF " << length_job << std::endl;
+            if(moveCommands::_move_base(goal)){
+                _srv_receive_pose_array.response.arr.poses.erase(_srv_receive_pose_array.response.arr.poses.begin());
+            } else
+            {
+                debug("14ERROR");
             }
-            else{
-                std::cout << "ERROR - Current State: " << MoveBaseClient.getState().toString() << std::endl;
-            }
-
-            _srv_receive_pose_array.response.arr.poses.erase(_srv_receive_pose_array.response.arr.poses.begin());
         }
     }
-    
-    int _send_goal(main_pkg::pointStamped_srv::Response p){
+
+    int _send_goal(main_pkg::pointStamped_srv::Response p)
+    {
         move_base_msgs::MoveBaseGoal goal;
         goal.target_pose.pose.position = p.pose.point;
-	    goal.target_pose.pose.orientation.w = 1.0;
+        goal.target_pose.pose.orientation.w = 1.0;
         goal.target_pose.header.frame_id = p.pose.header.frame_id;
         goal.target_pose.header.stamp = ros::Time::now();
 
@@ -212,12 +237,14 @@ public:
 
         MoveBaseClient.waitForServer();
         MoveBaseClient.sendGoalAndWait(goal);
-        if (MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
+        if (MoveBaseClient.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+        {
             std::cout << "SUCCES" << std::endl;
-        }else{
+        }
+        else
+        {
             std::cout << "ERROR" << std::endl;
         }
-        
     }
 
     void _delete_markers()
@@ -274,101 +301,92 @@ public:
 
     bool battery_check() //Returns true if it needs to recharge
     {
-	//debug("Checking battery");
         float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate pct
-	ROS_INFO("pct: %f", batterypct);
-            
-        if(current_dock_state == 0 && batterypct < minimum_battery_pct){ //Not in dock and under minimal%
+        ROS_INFO("pct: %f", batterypct);
+
+        if (current_dock_state == 0 && batterypct < minimum_battery_pct)
+        { //Not in dock and under minimal%
             debug("Battery is under minimal charge");
 
-	    _moveToDock();
+            _moveToDock();
 
             return true;
-        }	
-	//In dock and under minimal%
-	else if(current_dock_state == 6 && batterypct < minimum_battery_pct){
+        }
+        //In dock and under minimal%
+        else if (current_dock_state == 6 && batterypct < minimum_battery_pct)
+        {
             return true;
-	}
+        }
         return false;
     }
 
-    void _moveToDock(){
-
-
+    void _moveToDock()
+    {
         debug("Moving to the dock");
-        
-        if(xPos.point.x || xPos.point.y || xPos.point.z){
+
+        std::cout << "Point is: " << chargingPoint.point << std::endl;
+
+        if (chargingPoint.point.x != 0 || chargingPoint.point.y != 0 || chargingPoint.point.z != 0)
+        {
             move_base_msgs::MoveBaseGoal goal;
-            goal.target_pose.header.frame_id = xPos.header.frame_id;
+            goal.target_pose.header.frame_id = chargingPoint.header.frame_id;
             goal.target_pose.header.stamp = ros::Time::now();
-            goal.target_pose.pose.position = xPos.point;
+            goal.target_pose.pose.position = chargingPoint.point;
             ROS_INFO("Charging point found!");
             moveCommands::_move_base(goal);
-            system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimalt
-        }else{		
-            ROS_INFO("There is no point set for charging");		
+            system("roslaunch kobuki_auto_docking activate.launch --screen");
         }
-
-
-/*         //Get point 
-        _client_receive_pose_charging.call(_srv_receive_pose_charging);
-
-        main_pkg::pointStamped_srv::Response chargingPoint = _srv_receive_pose_charging.response;
-
-
-        if(chargingPoint.pose.point.x != 0 || chargingPoint.pose.point.y != 0 || chargingPoint.pose.point.z != 0){
-	        ROS_INFO("Charging point found!");	
-	        _send_goal(chargingPoint);
-            system("roslaunch kobuki_auto_docking activate.launch --screen"); //ikke optimalt
+        else
+        {
+            ROS_INFO("There is no point set for charging");
         }
-        else{		
-            ROS_INFO("There is no point set for charging");		
-        } */
     }
 
-    void _moveToKitchen(){
-       debug("Moving to the kitchen");
+    void _moveToKitchen()
+    {
+        debug("Moving to the kitchen");
         //Get point
         _client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
-                
+
         main_pkg::pointStamped_srv::Response kitchenPoint = _srv_receive_pose_kitchen.response;
-        
+
         //Check if pose_kitchen has been set (if not origo)
         if (kitchenPoint.pose.point.x != 0 || kitchenPoint.pose.point.y != 0 || kitchenPoint.pose.point.z != 0)
         {
             ROS_INFO("Kitchen point found!");
             _send_goal(kitchenPoint);
         }
-        else{
+        else
+        {
             ROS_INFO("Kitchen point not found");
         }
     }
 
     //Get navmode from server
-    void _get_navMode(){
-	_client_receive_navMode.call(_srv_receive_navMode);
+    void _get_navMode()
+    {
+        _client_receive_navMode.call(_srv_receive_navMode);
 
-	_navMode = static_cast<navMode>(_srv_receive_navMode.response.mode);
-	
-	std::cout << "Navmode is: " << _navMode << std::endl;
+        _navMode = static_cast<navMode>(_srv_receive_navMode.response.mode);
+
+        std::cout << "Navmode is: " << _navMode << std::endl;
     }
 
 public:
     MoveBase() : MoveBaseClient("move_base", true)
     {
-
     }
 };
 
 class Reverse : public moveCommands
 {
-    protected:
-
-    enum charger_state{
+protected:
+    enum charger_state
+    {
         DISCHARGING = 0,
-        DOCKING_CHARGED  = 2,
+        DOCKING_CHARGED = 2,
         DOCKING_CHARGING = 6,
-        ADAPTER_CHARGED  = 18,
+        ADAPTER_CHARGED = 18,
         ADAPTER_CHARGING = 22,
     };
 
@@ -378,31 +396,37 @@ class Reverse : public moveCommands
     ros::Subscriber sub = _nh.subscribe("/mobile_base/events/power_system", 0, &Reverse::dockingPos, this);
     ros::Subscriber sub1 = _nh.subscribe("/mobile_base/sensors/core", 0, &Reverse::chargingState, this);
     ros::Subscriber subOdom = _nh.subscribe("/odom", 0, &Reverse::position, this);
-    ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop",10);
-    geometry_msgs::PointStamped currentPos, dockPos;
-    
-    actionlib::SimpleActionServer<main_pkg::reverseAction> _as;     
-    std::string _actionName;                                        
-    main_pkg::reverseFeedback _feedback;                            
-    main_pkg::reverseResult _result;                                
-    bool docking;                                                   
-    public:
-    Reverse(std::string name) :
-        _as(_nh, name, boost::bind(&Reverse::executeCB, this, _1), false),
-         _actionName(name){
-            _as.start();
-            std::cout << "started" << std::endl;
-         }
+    ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10);
+    geometry_msgs::PointStamped currentPos, dockPos, xPos;
 
-    void executeCB(const main_pkg::reverseGoalConstPtr &goal){
-        if(_chargingState==DISCHARGING){
-            if(xPos.point.x || xPos.point.y || xPos.point.z){
+    actionlib::SimpleActionServer<main_pkg::reverseAction> _as;
+    std::string _actionName;
+    main_pkg::reverseFeedback _feedback;
+    main_pkg::reverseResult _result;
+    bool docking;
+
+public:
+    Reverse(std::string name) : _as(_nh, name, boost::bind(&Reverse::executeCB, this, _1), false),
+                                _actionName(name)
+    {
+        _as.start();
+        std::cout << "started" << std::endl;
+    }
+
+    void executeCB(const main_pkg::reverseGoalConstPtr &goal)
+    {
+        if (_chargingState == DISCHARGING)
+        {
+            if (xPos.point.x || xPos.point.y || xPos.point.z)
+            {
                 _result.result = 1;
-            }else{
+            }
+            else
+            {
                 _result.result = 0;
             }
-           _as.setSucceeded(_result); 
-           return;
+            _as.setSucceeded(_result);
+            return;
         }
         ros::Rate loop_rate(100);
         debug("5");
@@ -411,68 +435,77 @@ class Reverse : public moveCommands
         double distance = 0;
         std::cout << "Backing up" << std::endl;
         std::cout << goal->distance << std::endl;
-        while(ros::ok() && distance < 0.4){
+        while (ros::ok() && distance < 0.4)
+        {
             cmd_vel.publish(t);
             std::cout << "Backing up" << std::endl;
-            _feedback.status = sqrt(std::pow(dockPos.point.x - currentPos.point.x,2)+std::pow(dockPos.point.y - currentPos.point.y,2));
+            _feedback.status = sqrt(std::pow(dockPos.point.x - currentPos.point.x, 2) + std::pow(dockPos.point.y - currentPos.point.y, 2));
             distance = _feedback.status;
             _as.publishFeedback(_feedback);
-            if(_as.isPreemptRequested() || !ros::ok()){
+            if (_as.isPreemptRequested() || !ros::ok())
+            {
                 _as.setPreempted();
                 success = false;
                 break;
             }
             loop_rate.sleep();
         }
-        
-        if(success){
+
+        if (success)
+        {
             _result.result = _feedback.status;
             xPos = currentPos;
             _as.setSucceeded(_result);
+            std::cout << "CHARGING POINT SET TO: " << xPos << std::endl;
+            chargingPoint = xPos; //Set the movebase class' xPos to the same
         }
 
-        
         //Public cmd_vel
-
     }
 
-
-    void dockingPos(const kobuki_msgs::PowerSystemEvent::ConstPtr& state){
+    void dockingPos(const kobuki_msgs::PowerSystemEvent::ConstPtr &state)
+    {
         //todo add doskPos = NULLs
         ROS_INFO("Charge info received.");
-        if(state->event == state->PLUGGED_TO_DOCKBASE || state->event == state->CHARGE_COMPLETED){
+        if (state->event == state->PLUGGED_TO_DOCKBASE || state->event == state->CHARGE_COMPLETED)
+        {
             docking = true;
             dockPos = currentPos;
             std::cout << "Lade pois" << std::endl;
-        }else if (state->event == state->PLUGGED_TO_ADAPTER || state->event == state->UNPLUGGED){
+        }
+        else if (state->event == state->PLUGGED_TO_ADAPTER || state->event == state->UNPLUGGED)
+        {
             docking = false;
         }
-       // ROS_INFO(std::to_string(state->event));
-        
+        // ROS_INFO(std::to_string(state->event));
     }
-    void position(const nav_msgs::Odometry::ConstPtr &msg){
-        //save position 
+    void position(const nav_msgs::Odometry::ConstPtr &msg)
+    {
+        //save position
         currentPos.point = msg->pose.pose.position;
         currentPos.header.frame_id = msg->header.frame_id;
         currentPos.header.stamp = ros::Time::now();
     }
 
-    void chargingState(const kobuki_msgs::SensorState::ConstPtr &msg){
-        _chargingState=(charger_state)msg->charger;
+    void chargingState(const kobuki_msgs::SensorState::ConstPtr &msg)
+    {
+        _chargingState = (charger_state)msg->charger;
     }
 
-
     bool returnToDock(std_srvs::SetBool::Request &req,
-                        std_srvs::SetBool::Response &res){
-                            if(xPos.point.x || xPos.point.y || xPos.point.z){
-                                move_base_msgs::MoveBaseGoal goal;
-                                goal.target_pose.header.frame_id = xPos.header.frame_id;
-                                goal.target_pose.header.stamp = ros::Time::now();
-                                goal.target_pose.pose.position = xPos.point;
-                                moveCommands::_move_base(goal);
-                            }
-                        }
-
+                      std_srvs::SetBool::Response &res)
+    {
+        debug("Return to dock");
+        if (xPos.point.x || xPos.point.y || xPos.point.z)
+        {
+            debug("xPos exists!");
+            move_base_msgs::MoveBaseGoal goal;
+            goal.target_pose.header.frame_id = xPos.header.frame_id;
+            goal.target_pose.header.stamp = ros::Time::now();
+            goal.target_pose.pose.position = xPos.point;
+            moveCommands::_move_base(goal);
+        }
+    }
 };
 
 //tydebugdef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> Client;
@@ -487,9 +520,10 @@ int main(int argc, char *argv[])
     ros::Rate loop_rate(1);
     while (ros::ok)
     {
-        if (e.job_size() == 0)      //If robot doesn't have any jobs to perform
+        if (e.job_size() == 0) //If robot doesn't have any jobs to perform
         {
-	        if(!e.battery_check()){ //If it doesn't require recharging
+            if (!e.battery_check())
+            { //If it doesn't require recharging
                 e._receive_pose_array();
             }
         }

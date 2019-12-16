@@ -10,8 +10,6 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <iostream>
 #include <vector>
-#include <main_pkg/poseArray.h>
-#include <main_pkg/poseTasks.h>
 #include <main_pkg/pointStamped_srv.h>
 #include <main_pkg/serverMode.h>
 #include <main_pkg/routeName.h>
@@ -32,8 +30,6 @@ class Services
 class Server
 {
     int i = 0;
-    std::vector<std::string> ops;
-    char sti[1025];
 
     //Stucture for storing tasks "name" is for giving the task a name,
     // and PoseArray is an array consisting of coordinates.w
@@ -123,36 +119,6 @@ private:
         pose_charging.header.frame_id = msg->header.frame_id;
 
         std::cout << "Charging point:" << pose_charging.point << std::endl;
-    }
-
-    void traverse(char *fn, bool canAdd) 
-    {
-        DIR *dir;
-        struct dirent *entry;
-        char path[1025];
-        struct stat info;
-
-        if ((dir = opendir(fn)) != NULL){
-            while ((entry = readdir(dir)) != NULL) {
-                std::string s = entry->d_name;
-                if (s.find("mymap") != std::string::npos && !canAdd){
-                    strncpy(sti,fn,1025);
-                    traverse(fn, true);
-                    return;
-                }
-                else if (entry->d_name[0] != '.') {
-                    if(canAdd)  
-                        ops.push_back(entry->d_name);
-                    strcpy(path, fn);
-                    strcat(path, "/");
-                    strcat(path, entry->d_name);
-                    stat(path, &info);
-                    if (S_ISDIR(info.st_mode))  
-                        traverse(path, false);
-                }
-            }
-            closedir(dir);
-        }
     }
 
 
@@ -264,17 +230,6 @@ public:
         res.pose = pose_charging;
     }
 
-    bool display_maps(std_srvs::Empty::Request &req,
-                   std_srvs::Empty::Response &res)
-    {
-        ROS_INFO_STREAM("Server displaying maps..");
-        traverse("/home", false);
-
-        printf("%s\n\n", sti);
-        for(u_int i = 0; i < ops.size(); i++)
-            std::cout <<ops[i]<<std::endl;
-        return 1;
-    }
 
     bool change_navMode(main_pkg::navMode::Request &req,
 			main_pkg::navMode::Response &res)
