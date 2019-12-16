@@ -64,7 +64,7 @@ class moveCommands{
     moveCommands() : MoveBaseClient("move_base",true){}     //MoveBaseClient is initialized
 
     //Location in front of charging station
-    geometry_msgs::PointStamped xPos;
+    static geometry_msgs::PointStamped xPos;
 };
 
 class MoveBase :  moveCommands
@@ -109,7 +109,7 @@ private:
     int current_dock_state = 2;
     protected:
     //Location in front of charging station
-    geometry_msgs::PointStamped xPos;
+    //geometry_msgs::PointStamped xPos;
 public:
     int job_size()
     {
