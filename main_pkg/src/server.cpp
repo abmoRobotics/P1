@@ -10,13 +10,12 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <iostream>
 #include <vector>
-#include <main_pkg/poseArray.h>
-#include <main_pkg/poseTasks.h>
 #include <main_pkg/pointStamped_srv.h>
 #include <main_pkg/serverMode.h>
 #include <main_pkg/routeName.h>
 #include <main_pkg/recieve_task_name.h>
 #include <main_pkg/poseArray_srv.h>
+#include <main_pkg/navMode.h>
 #include <string.h>
 #include <std_srvs/Empty.h>
 #include <std_srvs/SetBool.h>
@@ -31,8 +30,6 @@ class Services
 class Server
 {
     int i = 0;
-    std::vector<std::string> ops;
-    char sti[1025];
 
     //Stucture for storing tasks "name" is for giving the task a name,
     // and PoseArray is an array consisting of coordinates.w
@@ -64,22 +61,38 @@ private:
         inactivate,
         taskCoordinates,
         kitchenPos,
-        chargingPos
         //0 = inactivate no points can be stored
         //1 = points are stored to the task array
         //2 = points are stored to the kitchen position
     };
     int server_mode = 0;
 
+    //A enum with 2 possibilities defined
+    enum navMode
+    {
+        automatic,
+        operation
+    };
+    navMode _navMode = operation;
+
+    /**
+     * Insert point in task vector
+     *
+     * The recived point is stored in a PoseStamped datatype, which is then pushed into a PoseArray.
+     * If the server mode is 0 do nothing with the coordinate.
+     *
+     * @param "msg" contains the point used when creating routes.
+     */
     void insert_point(const geometry_msgs::PointStamped::ConstPtr msg)
     {
         geometry_msgs::PoseStamped pose;
-        pose.pose.position.x = msg->point.x;
-        pose.pose.position.y = msg->point.y;
-        pose.pose.position.z = msg->point.z;
-        pose.pose.orientation.w = 1.0;
-        savedTasks.poseArray.header.stamp = ros::Time::now();
-        savedTasks.poseArray.header.frame_id = msg->header.frame_id;
+    
+        pose.pose.position.x = msg->point.x;    
+        pose.pose.position.y = msg->point.y;    
+        pose.pose.position.z = msg->point.z;    
+        pose.pose.orientation.w = 1.0;          
+        savedTasks.poseArray.header.stamp = ros::Time::now();   
+        savedTasks.poseArray.header.frame_id = msg->header.frame_id;    
         savedTasks.poseArray.poses.push_back(pose.pose);
 
         std::cout << "punkt: " << savedTasks.poseArray.poses[i] << std::endl;
@@ -96,6 +109,7 @@ private:
 
         std::cout << "Kitchen point:" << pose_kitchen.point << std::endl;
     }
+
     void insert_charging(const geometry_msgs::PointStamped::ConstPtr msg)
     {
         pose_charging.point.x = msg->point.x;
@@ -107,55 +121,27 @@ private:
         std::cout << "Charging point:" << pose_charging.point << std::endl;
     }
 
-    void traverse(char *fn, bool canAdd) 
-    {
-        DIR *dir;
-        struct dirent *entry;
-        char path[1025];
-        struct stat info;
-
-        if ((dir = opendir(fn)) != NULL){
-            while ((entry = readdir(dir)) != NULL) {
-                std::string s = entry->d_name;
-                if (s.find("mymap") != std::string::npos && !canAdd){
-                    strncpy(sti,fn,1025);
-                    traverse(fn, true);
-                    return;
-                }
-                else if (entry->d_name[0] != '.') {
-                    if(canAdd)  
-                        ops.push_back(entry->d_name);
-                    strcpy(path, fn);
-                    strcat(path, "/");
-                    strcat(path, entry->d_name);
-                    stat(path, &info);
-                    if (S_ISDIR(info.st_mode))  
-                        traverse(path, false);
-                }
-            }
-            closedir(dir);
-        }
-    }
-
 
 public:
+    /**
+     * Process Rviz points depending on the server mode.
+     *
+     * If the server mode is 1, points will be inserted in a vector using insert_point().
+     * if the server mode is 2, points will be inserted as the pose for the kitchen using insert_kitchen().
+     * If the server mode is 0 do nothing with the coordinate.
+     *
+     * @param &msg contains the point used when creating routes and kitchen points. 
+     */
     void recieve_points(const geometry_msgs::PointStamped::ConstPtr &msg)
     {
-        
-        switch (server_mode)
-        {
-        case taskCoordinates: //Insert point in task
-            insert_point(msg);
-            break;
-        case kitchenPos:
-            insert_kitchen(msg);
-            break;
-        case chargingPos:
-            insert_charging(msg);
-            break;
-        default:
+        if(server_mode == taskCoordinates){
+            insert_point(msg);                  
+        }
+        else if(server_mode == kitchenPos){
+            insert_kitchen(msg);                
+        }
+        else{
             ROS_INFO("SERVER: CANNOT INSERT POINT");
-            break;
         }
     }
 
@@ -178,6 +164,8 @@ public:
         //std::cout << req.name << std::endl;
         return 1;
     }
+
+
 
     bool stop_task(std_srvs::Empty::Request &req,
                    std_srvs::Empty::Response &res)
@@ -242,15 +230,17 @@ public:
         res.pose = pose_charging;
     }
 
-    bool display_maps(std_srvs::Empty::Request &req,
-                   std_srvs::Empty::Response &res)
-    {
-        ROS_INFO_STREAM("Server displaying maps..");
-        traverse("/home", false);
 
-        printf("%s\n\n", sti);
-        for(u_int i = 0; i < ops.size(); i++)
-            std::cout <<ops[i]<<std::endl;
+    bool change_navMode(main_pkg::navMode::Request &req,
+			main_pkg::navMode::Response &res)
+    {
+	_navMode = static_cast<navMode>(req.mode);
+	std::cout << "Nav mode changed to: " << _navMode << std::endl;
+	return 1;
+    }
+
+    bool get_navMode(main_pkg::navMode::Request &req, main_pkg::navMode::Response &res){
+	res.mode = _navMode;
         return 1;
     }
 
@@ -273,6 +263,8 @@ int main(int argc, char *argv[])
     ros::ServiceServer server6 = nh.advertiseService("get_job", &Server::get_job, &server_instance);
     ros::ServiceServer server7 = nh.advertiseService("get_pose_kitchen", &Server::get_pose_kitchen, &server_instance);
     ros::ServiceServer server8 = nh.advertiseService("get_pose_charging", &Server::get_pose_charging, &server_instance);
+    ros::ServiceServer server9 = nh.advertiseService("change_navMode", &Server::change_navMode, &server_instance);
+    ros::ServiceServer server10 = nh.advertiseService("get_navMode", &Server::get_navMode, &server_instance);
         //subsribers
     ros::Subscriber click_sub = nh.subscribe("clicked_point", 100, &Server::recieve_points, &server_instance);
     

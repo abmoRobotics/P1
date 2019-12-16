@@ -3,13 +3,19 @@
 #include <main_pkg/routeName.h>
 #include <main_pkg/serverMode.h>
 #include <main_pkg/recieve_task_name.h>
+#include <main_pkg/navMode.h>
 #include <string>
 #include <vector>
 #include <std_srvs/SetBool.h>
 #include <std_srvs/Empty.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include <actionlib/client/simple_action_client.h>
 #include <main_pkg/reverseAction.h>
 #include <std_srvs/SetBool.h>
+#include <sstream>
+#include <kobuki_msgs/SensorState.h>
 
 class Menu
 {
@@ -24,6 +30,8 @@ private:
     ros::ServiceClient client_turtlebot_job = _nh.serviceClient<main_pkg::serverMode>("turtlebot_job");
     ros::ServiceClient client_toggle_explore = _nh.serviceClient<std_srvs::SetBool>("toggle_explore");
     ros::ServiceClient client_show_maps = _nh.serviceClient<std_srvs::SetBool>("show_maps");
+    ros::ServiceClient client_change_navMode = _nh.serviceClient<main_pkg::navMode>("change_navMode");
+
 
     //srv messages
     main_pkg::routeName srv_add_task;
@@ -32,9 +40,21 @@ private:
     std_srvs::Empty srv_show_maps;
     std_srvs::SetBool srv_toggle_explore;
     main_pkg::recieve_task_name srv_recieve_task_name;
+    main_pkg::navMode srv_change_navMode;
+
+    //A enum with 2 possibilities defined
+    enum navMode
+    {
+        automatic,
+        operation
+    };
+    navMode _navMode = operation;
 
 public:
 private:
+
+    char sti[1023];
+    std::vector<std::string> ops;
     //Function that removes redundant information from console
     void _menuLines(){std::cout << "------------------------------------" << std::endl;}
     //Menu that shows when trying to create a route
@@ -42,13 +62,12 @@ private:
     {
         inactivate,
         taskCoordinates,
-        kitchenPos,
-        chargingPos
+        kitchenPos
         //0 = inactivate no points can be stored
         //1 = points are stored to the task array
         //2 = points are stored to the kitchen position
     };
-    void _createMenu()
+    void _createTask()
     {
         system("clear");
         int selection = 0;
@@ -105,13 +124,20 @@ private:
     void _showMaps()
     {
         std::cout << "Displaying list of maps. Enter the map number to load." << std::endl;
-        client_show_maps.call(srv_show_maps); 
-        std::vector<std::string> ops;
+        char st[] = {'/','h','o','m','e'};
+	ops.clear();
+        traverse(st, false);
+        printf("%s\n\n", sti);
+        for(u_int i = 0; i < ops.size(); i++)
+            std::cout << i+1 << " " << ops[i] << std::endl;
+
         u_int mapNumber;
         std::cin >> mapNumber;
         std::string s = "rosrun map_server map_server ";
-        s += ops[mapNumber];
+        mapNumber--;
+	s += ops[mapNumber];
         system(s.c_str());
+        std::cout << ops[mapNumber] << " loaded." << std::endl;
         
     }
 
@@ -150,7 +176,20 @@ private:
         _server_mode(inactivate);
     }
 
-    void _chargingPoint(){
+    void _change_navMode(){
+	if(_navMode == automatic)
+		_navMode = operation;
+	else
+		_navMode = automatic;
+
+
+        srv_change_navMode.request.mode = _navMode;
+        client_change_navMode.call(srv_change_navMode);
+
+	std::cout <<"Changing navmode to: " << _navMode << std::endl;
+    }
+
+    /*void _chargingPoint(){ //Bliver ikke brugt længere
         system("clear");
         _server_mode(chargingPos);
         std::cout << "Insert charging point - press any key to return" << std::endl;
@@ -159,26 +198,12 @@ private:
 
         _server_mode(inactivate);
 
-    }
+    }*/
+
     void _server_mode(server_state s){
-        switch (s)
-        {
-        case inactivate:
-            srv_server_mode.request.mode = (int)inactivate;
-            break;
-        case taskCoordinates:
-            srv_server_mode.request.mode = (int)taskCoordinates;
-            break;
-        case kitchenPos:
-             srv_server_mode.request.mode = (int)kitchenPos;   
-            break;
-        case chargingPos:
-            srv_server_mode.request.mode = (int)chargingPos;
-            break;
-        default:
-            srv_server_mode.request.mode = (int)inactivate;
-            break;
-        }
+
+	srv_server_mode.request.mode = (int)s;
+
         client_server_mode.call(srv_server_mode);
         _menuLines();
         std::cout << "Server mode chaged " << s << std::endl;
@@ -194,34 +219,38 @@ private:
             std::cout << "----------------------------" << std::endl;
             std::cout << "1. Create route for Turtlebot" << std::endl;
             std::cout << "2. Send task for Turtlebot to perform" << std::endl;
-            std::cout << "3. Start automatic mapping" << std::endl;
-            std::cout << "4. Insert kitchen point" << std::endl;
-            std::cout << "5. Insert charging station point" << std::endl;
+            std::cout << "3. Change operational mode. Current: "; 
+	    std::string mode = "Manual"; if(_navMode==0) mode="Automatic"; std::cout << mode << std::endl;
+            std::cout << "4. Start automatic mapping" << std::endl;
+            std::cout << "5. Insert kitchen point" << std::endl;
             std::cout << "6. Save map" << std::endl;
             std::cout << "7. Load map" << std::endl;
             std::cout << "----------------------------" << std::endl;
+	    std::cout << "B0: Start- or continue route \nB1: Move to kitchen \nB2: Move to dock" << std::endl;
+        std::cout << "Press and hold B0 for minimum 3 sec to clear current route" << std::endl;
+	    std::cout << "----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
-            while (1 > c > 5)
+            while (1 > c > 7)
             {
                 std::cin >> c;
             }
 
             switch (c){
                 case 1:
-                    _createMenu();
+                    _createTask();
                     break;
                 case 2:
                     _sendTask();
                     break;
-                case 3:
+		case 3:
+		    _change_navMode();
+		    break;
+                case 4:
                     _automaticMapping();
                     break;
-                case 4:
-                    _kitchenPoint();
-                    break;
                 case 5:
-                    _chargingPoint();
+                    _kitchenPoint();
                     break;
                 case 6:
                     _saveMap();
@@ -238,6 +267,36 @@ private:
             
             
         }
+    }
+
+    void traverse(char *fn, bool canAdd) 
+    {
+        DIR *dir;
+        struct dirent *entry;
+        char path[1023];
+        struct stat info;
+        if ((dir = opendir(fn)) != NULL){
+            while ((entry = readdir(dir)) != NULL) {
+                std::string s = entry->d_name;
+                if (s.find(".pgm") != std::string::npos && !canAdd){
+                    strncpy(sti,fn,1023);
+                    traverse(fn, true);
+                    return;
+                }
+                else if (entry->d_name[0] != '.') {
+                    if(canAdd && s.find(".yaml") != std::string::npos)  
+                        ops.push_back(entry->d_name);
+                    strcpy(path, fn);
+                    strcat(path, "/");
+                    strcat(path, entry->d_name);
+                    stat(path, &info);
+                    if (S_ISDIR(info.st_mode))  
+                        traverse(path, false);
+                }
+            }
+            closedir(dir);
+        }
+        
     }
 
 public:
