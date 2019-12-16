@@ -500,7 +500,7 @@ public:
         {
             debug("xPos exists!");
             move_base_msgs::MoveBaseGoal goal;
-            goal.target_pose.header.frame_id = xPos.header.frame_id;
+            goal.target_pose.header.frame_id = "odom";
             goal.target_pose.header.stamp = ros::Time::now();
             goal.target_pose.pose.position = xPos.point;
             moveCommands::_move_base(goal);
