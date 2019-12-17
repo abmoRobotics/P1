@@ -31,6 +31,7 @@ private:
     ros::ServiceClient client_toggle_explore = _nh.serviceClient<std_srvs::SetBool>("toggle_explore");
     ros::ServiceClient client_show_maps = _nh.serviceClient<std_srvs::SetBool>("show_maps");
     ros::ServiceClient client_change_navMode = _nh.serviceClient<main_pkg::navMode>("change_navMode");
+    ros::ServiceClient client_return_to_dock = _nh.serviceClient<std_srvs::SetBool>("return_to_dock");
 
 
     //srv messages
@@ -39,6 +40,7 @@ private:
     std_srvs::Empty srv_stop_task;
     std_srvs::Empty srv_show_maps;
     std_srvs::SetBool srv_toggle_explore;
+    std_srvs::SetBool srv_return_to_dock;
     main_pkg::recieve_task_name srv_recieve_task_name;
     main_pkg::navMode srv_change_navMode;
 
@@ -111,6 +113,8 @@ private:
         std::getline(std::cin, c);
         srv_toggle_explore.request.data = false;
         client_toggle_explore.call(srv_toggle_explore);
+        srv_return_to_dock.request.data = true;
+        client_return_to_dock.call(srv_return_to_dock);
     }
 
     void _saveMap(){
@@ -125,7 +129,7 @@ private:
     {
         std::cout << "Displaying list of maps. Enter the map number to load." << std::endl;
         char st[] = {'/','h','o','m','e'};
-	ops.clear();
+	    ops.clear();
         traverse(st, false);
         printf("%s\n\n", sti);
         for(u_int i = 0; i < ops.size(); i++)
@@ -135,7 +139,7 @@ private:
         std::cin >> mapNumber;
         std::string s = "rosrun map_server map_server ";
         mapNumber--;
-	s += ops[mapNumber];
+	    s += ops[mapNumber];
         system(s.c_str());
         std::cout << ops[mapNumber] << " loaded." << std::endl;
         
@@ -227,8 +231,7 @@ private:
             std::cout << "7. Load map" << std::endl;
             std::cout << "----------------------------" << std::endl;
 	    std::cout << "B0: Start- or continue route \nB1: Move to kitchen \nB2: Move to dock" << std::endl;
-        std::cout << "Press and hold B0 for minimum 3 sec to clear current route" << std::endl;
-	    std::cout << "----------------------------" << std::endl;
+	    std::cout << "\n----------------------------" << std::endl;
             std::cout << "Select option: ";
             std::cin >> c;
             while (1 > c > 7)
@@ -285,7 +288,7 @@ private:
                 }
                 else if (entry->d_name[0] != '.') {
                     if(canAdd && s.find(".yaml") != std::string::npos)  
-                        ops.push_back(entry->d_name);
+                        ops.push_back(s);
                     strcpy(path, fn);
                     strcat(path, "/");
                     strcat(path, entry->d_name);

@@ -94,6 +94,7 @@ private:
     ros::ServiceClient _client_receive_pose_kitchen = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_kitchen");   //Service for getting the pose of the kitchen point
     ros::ServiceClient _client_receive_pose_charging = nh.serviceClient<main_pkg::pointStamped_srv>("get_pose_charging"); //Service for getting the pose of the charging point
     ros::ServiceClient _client_receive_navMode = nh.serviceClient<main_pkg::navMode>("get_navMode");
+    ros::ServiceServer serv = nh.advertiseService("return_to_dock", &MoveBase::_moveToDock, this);
 
     //Subscribers
     ros::Subscriber sub = nh.subscribe("/mobile_base/events/button", 0, &MoveBase::_button_event, this);         //
@@ -322,9 +323,7 @@ public:
 
     void _moveToDock()
     {
-        debug("Moving to the dock");
-
-        std::cout << "Point is: " << chargingPoint.point << std::endl;
+        std::cout << "Moving to the dock. Point is: " << chargingPoint.point << std::endl;
 
         if (chargingPoint.point.x != 0 || chargingPoint.point.y != 0 || chargingPoint.point.z != 0)
         {
@@ -337,9 +336,12 @@ public:
             system("roslaunch kobuki_auto_docking activate.launch --screen");
         }
         else
-        {
             ROS_INFO("There is no point set for charging");
-        }
+    }
+    bool _moveToDock(std_srvs::SetBool::Request &req,
+                      std_srvs::SetBool::Response &res)
+    {
+        _moveToDock();
     }
 
     void _moveToKitchen()
