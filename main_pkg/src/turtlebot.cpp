@@ -71,6 +71,9 @@ protected:
         
         ;
     }
+    bool _cancenl_goals(){
+        MoveBaseClient.cancelAllGoals();
+    }
     moveCommands() : MoveBaseClient("move_base", true) {} //MoveBaseClient is initialized
 };
 
@@ -94,7 +97,7 @@ protected:
     ros::Subscriber sub1 = _nh.subscribe("/mobile_base/sensors/core", 0, &Reverse::chargingState, this);
     ros::Subscriber subOdom = _nh.subscribe("/odom", 0, &Reverse::position, this);
     ros::Publisher cmd_vel = _nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10);
-    geometry_msgs::PointStamped currentPos, dockPos, xPos;
+    geometry_msgs::PointStamped currentPos, dockPos;
 
     actionlib::SimpleActionServer<main_pkg::reverseAction> _as;
     std::string _actionName;
@@ -114,7 +117,7 @@ public:
     {
         if (_chargingState == DISCHARGING)
         {
-            if (xPos.point.x || xPos.point.y || xPos.point.z)
+            if (chargingPoint.point.x || chargingPoint.point.y || chargingPoint.point.z)
             {
                 _result.result = 1;
             }
@@ -129,14 +132,15 @@ public:
         debug("5");
         bool success = true;
         t.linear.x = -0.2;
-        
+        double time = ros::Time::now().toSec();
         double distance = 0;
         std::cout << "Backing up" << std::endl;
-        while (ros::ok() && distance < 0.4)
+        while (ros::ok() && distance < 0.4 && ros::Time::now().toSec() - time < 2.5)
         {
             cmd_vel.publish(t);
             std::cout << "Backing up" << std::endl;
             distance = sqrt(std::pow(dockPos.point.x - currentPos.point.x, 2) + std::pow(dockPos.point.y - currentPos.point.y, 2));
+            std::cout << "distance: "<<distance << std::endl;
             
             if (!ros::ok())
             {
@@ -146,13 +150,13 @@ public:
             loop_rate.sleep();
         }
 
+    std::cout << "1: before: "<<chargingPoint << std::endl;
+     //chargingPoint = currentPos;
+    std::cout << "1: after: "<<chargingPoint << std::endl;
         
-        xPos = currentPos;
-        std::cout << "CHARGING POINT SET TO: " << xPos << std::endl;
-        chargingPoint = xPos; //Set the movebase class' xPos to the same
-        
+
        double angular_speed = 0.5;
-       double relative_angle = 6.2831852;
+       double relative_angle = 6.2831852/2;
    
        t.linear.x=0;
        t.linear.y=0;
@@ -179,7 +183,7 @@ public:
     {
         if (_chargingState == DISCHARGING)
         {
-            if (xPos.point.x || xPos.point.y || xPos.point.z)
+            if ( chargingPoint.point.x || chargingPoint.point.y || chargingPoint.point.z)
             {
                 _result.result = 1;
             }
@@ -197,7 +201,8 @@ public:
         double distance = 0;
         std::cout << "Backing up" << std::endl;
         std::cout << goal->distance << std::endl;
-        while (ros::ok() && distance < 0.4)
+        double time =ros::Time::now().toSec();
+        while (ros::ok() && distance < 0.4 && ros::Time::now().toSec() - time < 2.5)
         {
             cmd_vel.publish(t);
             std::cout << "Backing up" << std::endl;
@@ -213,16 +218,56 @@ public:
             loop_rate.sleep();
         }
 
-        if (success)
-        {
-            _result.result = _feedback.status;
-            xPos = currentPos;
-            _as.setSucceeded(_result);
-            std::cout << "CHARGING POINT SET TO: " << xPos << std::endl;
-            chargingPoint = xPos; //Set the movebase class' xPos to the same
-        }
-
+        
+        
+       double angular_speed = 0.5;
+       double relative_angle = 3.14159265*3;
+   
+       t.linear.x=0;
+       t.linear.y=0;
+       t.linear.z=0;
+       t.angular.x = 0;
+       t.angular.y = 0;
+   
+       t.angular.z = angular_speed;
+    
+       double t0 = ros::Time::now().toSec();
+       double current_angle = 0;
+        std::cout << "hello " << std::endl;
+        std::cout << "hello " << std::endl;
+        std::cout << "hello " << std::endl;
+        std::cout << "hello " << std::endl;
+        std::cout << "hello " << std::endl;
+       while(current_angle < relative_angle){
+           cmd_vel.publish(t);
+           double t1 = ros::Time::now().toSec();
+           current_angle = angular_speed*(t1-t0);
+        //std::cout << "angle: "<<current_angle << std::endl;
+       }
+        std::cout << "hello 2" << std::endl;
+        std::cout << "hello 2" << std::endl;
+        std::cout << "hello 2" << std::endl;
+        std::cout << "hello 2" << std::endl;
+        std::cout << "hello 2" << std::endl;
+        std::cout << "hello 2" << std::endl;
+        t.angular.z = 0;
+        cmd_vel.publish(t);
         //Public cmd_vel
+        if (success)
+        {   
+
+        std::cout << "hello 3" << std::endl;
+        std::cout << "hello 3" << std::endl;
+        std::cout << "hello 3" << std::endl;
+        std::cout << "hello 3" << std::endl;
+        std::cout << "hello 3" << std::endl;
+            _result.result = _feedback.status;
+        
+    std::cout << "2: before: "<<chargingPoint << std::endl;
+         chargingPoint = currentPos;
+    std::cout << "2: after: "<<chargingPoint << std::endl;
+            _as.setSucceeded(_result);
+        }
     }
 
     void dockingPos(const kobuki_msgs::PowerSystemEvent::ConstPtr &state)
@@ -258,13 +303,14 @@ public:
                       std_srvs::SetBool::Response &res)
     {
         debug("Return to dock");
-        if (xPos.point.x || xPos.point.y || xPos.point.z)
+        moveCommands::_cancenl_goals();
+        if  (chargingPoint.point.x || chargingPoint.point.y || chargingPoint.point.z)
         {
-            debug("xPos exists!");
+            debug( "chargingPoint exists!");
             move_base_msgs::MoveBaseGoal goal;
             goal.target_pose.header.frame_id = "odom";
             goal.target_pose.header.stamp = ros::Time::now();
-            goal.target_pose.pose.position = xPos.point;
+            goal.target_pose.pose.position = chargingPoint.point;
             moveCommands::_move_base(goal);
         }
     }
@@ -502,7 +548,7 @@ public:
     bool battery_check() //Returns true if it needs to recharge
     {
         float batterypct = float(current_battery) / float(kobuki_max_charge) * 100; //Calculate pct
-        ROS_INFO("pct: %f", batterypct);
+        //ROS_INFO("pct: %f", batterypct);
 
         if (current_dock_state == 0 && batterypct < minimum_battery_pct)
         { //Not in dock and under minimal%
@@ -522,12 +568,14 @@ public:
 
     void _moveToDock()
     {
-        std::cout << "Moving to the dock. Point is: " << chargingPoint.point << std::endl;
 
-        if (chargingPoint.point.x != 0 || chargingPoint.point.y != 0 || chargingPoint.point.z != 0)
+        moveCommands::_cancenl_goals();
+        std::cout << "Moving to the dock. Point is: " << chargingPoint << std::endl;
+
+        if (chargingPoint.point.x || chargingPoint.point.y || chargingPoint.point.z)
         {
             move_base_msgs::MoveBaseGoal goal;
-            goal.target_pose.header.frame_id = chargingPoint.header.frame_id;
+            goal.target_pose.header.frame_id = "odom";
             goal.target_pose.header.stamp = ros::Time::now();
             goal.target_pose.pose.position = chargingPoint.point;
             ROS_INFO("Charging point found!");
