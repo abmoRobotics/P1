@@ -301,17 +301,24 @@ public:
 
     bool returnToDock(std_srvs::SetBool::Request &req,
                       std_srvs::SetBool::Response &res)
-    {
+    {   
+        static bool returnOdom = false;
         debug("Return to dock");
         moveCommands::_cancenl_goals();
         if  (chargingPoint.point.x || chargingPoint.point.y || chargingPoint.point.z)
         {
             debug( "chargingPoint exists!");
             move_base_msgs::MoveBaseGoal goal;
-            goal.target_pose.header.frame_id = "odom";
+            goal.target_pose.header.frame_id = "map";
             goal.target_pose.header.stamp = ros::Time::now();
             goal.target_pose.pose.position = chargingPoint.point;
             moveCommands::_move_base(goal);
+
+            move_base_msgs::MoveBaseGoal goal1;
+            goal1.target_pose.header.frame_id = "odom";
+            goal1.target_pose.header.stamp = ros::Time::now();
+            goal1.target_pose.pose.position = chargingPoint.point;
+            moveCommands::_move_base(goal1);
         }
     }
 };
