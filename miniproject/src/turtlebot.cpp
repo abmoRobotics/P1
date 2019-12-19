@@ -9,7 +9,6 @@ class Turtlebot
     ros::NodeHandle n;
     ros::Publisher cmd_vel_pub = n.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
     ros::Subscriber sub = n.subscribe("/mobile_base/events/button", 1000, &Turtlebot::_button_event,this);
-    ros::ServiceClient client = nh.ServiceClient<>
 
     void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
     {
@@ -30,7 +29,18 @@ class Turtlebot
                     cmd_vel_message.angular.z = 1.57079632679;
                     cmd_vel_pub.publish(cmd_vel_message);
                     ros::Duration(0.5).sleep();
+                    ros::Rate loop_rate(10);
                 }
+                
+                /*
+                for (int y=0; y<4; y++){
+                    cmd_vel_message.linear.x = 0;
+                    cmd_vel_message.angular.z = 1.57079632679;
+                    cmd_vel_pub.publish(cmd_vel_message);
+                    ros::Duration(0.5).sleep();
+                    ros:Rate loop_rate(10);
+                }
+                */
             }
             if (msg->button == msg->Button1)
             {
@@ -46,14 +56,12 @@ class Turtlebot
 
 
 
-}
-;
+};
+
 int main(int argc, char *argv[]){
     std::cout << "Tryk på B0 for at køre i en firkant" << std::endl;
 
     ros::init(argc, argv, "Square");
-
-    
 
     Turtlebot jalla;
     ros::spin();
