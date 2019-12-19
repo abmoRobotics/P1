@@ -8,6 +8,7 @@ class Turtlebot
 {
     ros::NodeHandle n;
     ros::Publisher cmd_vel_pub = n.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
+    ros::Subscriber
 
     void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
     {
@@ -42,7 +43,7 @@ class Turtlebot
     }
 
 }
-
+;
 int main(int argc, char *argv[]){
     std::cout << "Tryk på B0 for at køre i en firkant" << std::endl;
 
