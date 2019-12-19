@@ -21,19 +21,7 @@ class Turtlebot
             if (msg->button == msg->Button0)
             {
                 std::cout << "B0 er nu blevet trykket på" << std::endl;
-                for (int i = 0; i < 4; i++)
-                {
-                    geometry_msgs::Twist cmd_vel_message;
-                    cmd_vel_message.linear.x = 0.5;
-                    cmd_vel_message.angular.z = 0;
-                    cmd_vel_pub.publish(cmd_vel_message);
-                    ros::Duration(0.5).sleep();
-
-                    cmd_vel_message.linear.x = 0;
-                    cmd_vel_message.angular.z = 1.57079632679;
-                    cmd_vel_pub.publish(cmd_vel_message);
-                    ros::Duration(0.5).sleep();
-                }
+		move_square();
             }
             if (msg->button == msg->Button1)
             {
@@ -47,8 +35,6 @@ class Turtlebot
             }
         }
     }
-        
-    //self.led1 = rospy.Publisher('/mobile_base/commands/led1', Led, queue_size=10) 
 
     bool led_on_off = false;
 
@@ -87,16 +73,47 @@ class Turtlebot
         
     }
 
+    void move_square(){
+	for (int i = 0; i < 4; i++)
+	{
+	    geometry_msgs::Twist cmd_vel_message;
+
+	    double t0 = ros::Time::now().toSec();
+	    double t1 = 0;
+	    while ((t1 - t0) < 3)
+	    {
+
+		cmd_vel_message.linear.x = 0.3;
+		cmd_vel_message.angular.z = 0;
+		cmd_vel_pub.publish(cmd_vel_message);
+		t1 = ros::Time::now().toSec();
+	    }
+
+	    t0 = ros::Time::now().toSec();
+	    t1 = 0;
+	    while ((t1 - t0) < 3)
+	    {
+
+		cmd_vel_message.linear.x = 0;
+		cmd_vel_message.angular.z = 0.64; //Den her skal selv justeres sådan at det er en firkant, ikke stol på matematikken, det er fake news..
+		cmd_vel_pub.publish(cmd_vel_message);
+		t1 = ros::Time::now().toSec();
+	    }
+	}
+
+
+    }
+
 }
 ;
 int main(int argc, char *argv[]){
     std::cout << "Tryk på B0 for at køre i en firkant" << std::endl;
 
-    ros::init(argc, argv, "Square");
+    ros::init(argc, argv, "turtlebot");
 
     
 
-    Turtlebot jalla;
+    Turtlebot t;
     ros::spin();
     return 0;
 }
