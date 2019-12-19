@@ -1,8 +1,11 @@
+
 #include <ros/ros.h>
 #include <iostream>
 #include <geometry_msgs/Twist.h>
 #include <kobuki_msgs/ButtonEvent.h>
 #include <kobuki_msgs/SensorState.h>
+//#include <std_srvs/Trigger.h>
+//#include <sound_play/sound_play.h>
 
 class Turtlebot
 {
@@ -31,28 +34,18 @@ class Turtlebot
                         cmd_vel_pub.publish(cmd_vel_message);
                         t1 = ros::Time::now().toSec();
                     }
-                    
+
                     t0 = ros::Time::now().toSec();
                     t1 = 0;
                     while ((t1 - t0) < 3)
                     {
 
                         cmd_vel_message.linear.x = 0;
-                        cmd_vel_message.angular.z = 0.523598776;
+                        cmd_vel_message.angular.z = 0.65; //Den her skal selv justeres sådan at det er en firkant, ikke stol på matematikken, det er fake news..
                         cmd_vel_pub.publish(cmd_vel_message);
                         t1 = ros::Time::now().toSec();
                     }
                 }
-
-                /*
-                for (int y=0; y<4; y++){
-                    cmd_vel_message.linear.x = 0;
-                    cmd_vel_message.angular.z = 1.57079632679;
-                    cmd_vel_pub.publish(cmd_vel_message);
-                    ros::Duration(0.5).sleep();
-                    ros:Rate loop_rate(10);
-                }
-                */
             }
             if (msg->button == msg->Button1)
             {
@@ -70,10 +63,16 @@ class Turtlebot
 int main(int argc, char *argv[])
 {
     std::cout << "Tryk på B0 for at køre i en firkant" << std::endl;
+    // ros::NodeHandle n;
+    ros::init(argc, argv, "turtlebot");
+    Turtlebot t;
 
-    ros::init(argc, argv, "Square");
-
-    Turtlebot jalla;
+    //hør lige om functionen den kalder
+    /*
+    ros::ServiceServer server_square = n.advertiseService("square", square);
+    ros::ServiceServer server_LED = n.advertiseService("LED", LED);
+    ros::ServiceServer server_sing = n.advertiseService("sing", sing);
+*/
     ros::spin();
     return 0;
 }

@@ -9,7 +9,8 @@ add_compile_options(-std=c++11)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
     roscpp
-
+    std_srvs
+    
 )
 
 ## System dependencies are found with CMake's conventions
@@ -122,6 +123,12 @@ ${catkin_INCLUDE_DIRS}
 add_executable(${PROJECT_NAME}_turtlebot src/turtlebot.cpp)
 set_target_properties(${PROJECT_NAME}_turtlebot PROPERTIES OUTPUT_NAME turtlebot PREFIX "")
 target_link_libraries(${PROJECT_NAME}_turtlebot
+${catkin_LIBRARIES}
+)
+
+add_executable(${PROJECT_NAME}_interface src/interface.cpp)
+set_target_properties(${PROJECT_NAME}_interface PROPERTIES OUTPUT_NAME interface PREFIX "")
+target_link_libraries(${PROJECT_NAME}_interface
 ${catkin_LIBRARIES}
 )
 

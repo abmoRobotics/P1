@@ -2,6 +2,9 @@
 #include <ros/ros.h>
 #include <std_srvs/Trigger.h>
 
+class menu
+{ 
+public:
 //Service
 ros::NodeHandle n;
 
@@ -56,7 +59,7 @@ void robotsing()
 
 
 
-void menu()
+void Menu()
 {
     int c=1;
 
@@ -88,13 +91,17 @@ void menu()
             robotsing();
             break;
         default:
-            std::cout << "Choose option 1, 2 or 3" << std::endl;
+            
             break;
         }
     }
 }
+  menu()
+  {
+      Menu();
+  }
 
-
+};
 int main(int argc, char *argv[])
 {
    ros::init(argc, argv, "interface");
