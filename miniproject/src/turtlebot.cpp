@@ -42,33 +42,42 @@ class Turtlebot
         }
     }
 
-  function square (std_srvs::Trigger::Request &req,
+   void square (std_srvs::Trigger::Request &req,
                std_srvs::Trigger::Response &res)
     {
         //axel go crazy
     }
-  function LED (std_srvs::Trigger::Request &req,
+   void LED (std_srvs::Trigger::Request &req,
             std_srvs::Trigger::Response &res)
     {
 
     }
 
-  function sing (std_srvs::Trigger::Request &req,
+   void sing (std_srvs::Trigger::Request &req,
              std_srvs::Trigger::Response &res)
     {
-      
+      sound_play::SoundClient sc;
+
+	  sleepok(1, n);
+	  const char *str = "/home/ros/megalovania.ogg";
+	  sc.startWave(str);
+	  ROS_INFO("Spiller sang");
+	  sleepok(3, n);
 
     }
 }
 ;
 int main(int argc, char *argv[]){
     std::cout << "Tryk på B0 for at køre i en firkant" << std::endl;
-    ros::NodeHandle n;
+
     ros::init(argc, argv, "Square");
+    ros::NodeHandle n;
+    Turtlebot Turtlebot_instance;
+
   //hør lige om functionen den kalder
-    ros::ServiceServer server_square = n.advertiseService("square", square);
-    ros::ServiceServer server_LED = n.advertiseService("LED", LED);
-    ros::ServiceServer server_sing = n.advertiseService("sing", sing);
+    ros::ServiceServer server_square = n.advertiseService("square", &Turtlebot::square, &Turtlebot_instance);
+    ros::ServiceServer server_LED = n.advertiseService("LED", &Turtlebot::LED, &Turtlebot_instance));
+    ros::ServiceServer server_sing = n.advertiseService("sing", &Turtlebot::sing, &Turtlebot_instance));
 
     return 0;
 }
