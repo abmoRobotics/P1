@@ -8,7 +8,8 @@ class Turtlebot
 {
     ros::NodeHandle n;
     ros::Publisher cmd_vel_pub = n.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
-    ros::Subscriber
+    ros::Subscriber sub = n.subscribe("/mobile_base/events/button", 1000, &Turtlebot::_button_event,this);
+    ros::ServiceClient client = nh.ServiceClient<>
 
     void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
     {
@@ -20,8 +21,13 @@ class Turtlebot
                 for (int i = 0; i < 4; i++)
                 {
                     geometry_msgs::Twist cmd_vel_message;
-                    cmd_vel_message.linear.x = 1;
-                    cmd_vel_message.angular.z = 1.57079633;
+                    cmd_vel_message.linear.x = 0.5;
+                    cmd_vel_message.angular.z = 0;
+                    cmd_vel_pub.publish(cmd_vel_message);
+                    ros::Duration(0.5).sleep();
+
+                    cmd_vel_message.linear.x = 0;
+                    cmd_vel_message.angular.z = 1.57079632679;
                     cmd_vel_pub.publish(cmd_vel_message);
                     ros::Duration(0.5).sleep();
                 }
@@ -38,9 +44,7 @@ class Turtlebot
         }
     }
 
-    Turtlebot()
-    {
-    }
+
 
 }
 ;
@@ -49,5 +53,9 @@ int main(int argc, char *argv[]){
 
     ros::init(argc, argv, "Square");
 
+    
+
+    Turtlebot jalla;
+    ros::spin();
     return 0;
 }
