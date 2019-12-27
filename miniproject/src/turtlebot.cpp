@@ -5,44 +5,64 @@
 #include <kobuki_msgs/SensorState.h>
 #include <kobuki_msgs/Led.h>
 #include <std_srvs/Trigger.h>
+#include <sound_play/sound_play.h>
 
 class Turtlebot
 {
+    //NodeHandle
     ros::NodeHandle n;
+    //Publishers
     ros::Publisher cmd_vel_pub = n.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
     ros::Publisher led1_pub = n.advertise<kobuki_msgs::Led>("mobile_base/commands/led1", 1000);
     ros::Publisher led2_pub = n.advertise<kobuki_msgs::Led>("mobile_base/commands/led2", 1000);
+    //Subscribers
     ros::Subscriber sub = n.subscribe("/mobile_base/events/button", 1000, &Turtlebot::_button_event,this);
-    //ros::ServiceClient client = nh.ServiceClient<> 
+    //SoundClient
+    sound_play::SoundClient sc; 
 
+    //Button Event Function
     void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
     {
+        //When a button is pressed
         if (msg->state == msg->PRESSED)
         {
+	    //Check which button
             if (msg->button == msg->Button0)
             {
-                std::cout << "B0 er nu blevet trykket på" << std::endl;
-		move_square();
+                std::cout << "B0 has been pressed" << std::endl;
+		//move_square();
             }
             if (msg->button == msg->Button1)
             {
-                std::cout << "B1 er nu blevet trykket på" << std::endl;
-                led_blink();
+                std::cout << "B1 has been pressed" << std::endl;
+                //led_blink();
             }
 
             if (msg->button == msg->Button2)
             {
-                std::cout << "B2 er nu blevet trykket på" << std::endl;
+                std::cout << "B2 has been pressed" << std::endl;
+		//sing_song();
             }
         }
     }
 
+    //Function that sleeps. Used when playing sound
+    void sleepok(int t, ros::NodeHandle &n) 
+    {
+	if (n.ok()) //Sleep for t seconds
+	sleep(t);
+    }
+
+    //Turns the led's on or off
     bool led_on_off = false;
+
 public:
 
     void led_blink(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res)
     {
+	std::cout << "led_blink()" << std::endl;
+       //Swaps the value of "led_on_off" between true and false
         if(led_on_off == false)
             led_on_off = true;
         else if(led_on_off == true)
@@ -51,8 +71,11 @@ public:
 
         kobuki_msgs::Led msg1;
         kobuki_msgs::Led msg2;
+	
         ros::Rate loop_rate(20);
-        while (led_on_off) //when led_on_off == true
+
+	//While loop for blinking
+        while (led_on_off)
         {
             msg1.value = msg1.ORANGE;
             led1_pub.publish(msg1);
@@ -77,7 +100,8 @@ public:
 
     void move_square(std_srvs::Trigger::Request &req,
                      std_srvs::Trigger::Response &res)
-        {
+    {
+	std::cout << "move_square()" << std::endl;
 	for (int i = 0; i < 4; i++)
 	{
 	    geometry_msgs::Twist cmd_vel_message;
@@ -110,24 +134,39 @@ public:
     
     void sing_song(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res)
-        {
-
+    {
+	std::cout << "sing_song()" << std::endl;
     }
+
+    void sing_song(){
+	std::cout <<"singsongong" << std::endl;
+	sleepok(1, n);
+	//The path to the sound file
+	const char *str = "/home/ros/megalovania.ogg";
+	//Star the music
+	sc.startWave(str);
+	ROS_INFO("Playing music");
+	sleepok(3, n);
+    }
+
 }
 ;
 int main(int argc, char *argv[]){
-    //std::cout << "Tryk på B0 for at køre i en firkant" << std::endl;
     std::cout << "Use the buttons respectively to initiate the task" << std::endl;
 
     ros::init(argc, argv, "turtlebot");
     ros::NodeHandle nh;
-    Turtlebot Turtlebot_instance;
+    //Turtlebot Turtlebot_instance;
 
-    ros::ServiceServer server_square = nh.advertiseService("square", &Turtlebot::move_square, &Turtlebot_instance);
+    //Jeg har kommenteret serviceserversne da de giver fejl lige nu :(((
+
+    /*ros::ServiceServer server_square = nh.advertiseService("square", &Turtlebot::move_square, &Turtlebot_instance);
     ros::ServiceServer server_LED = nh.advertiseService("LED", &Turtlebot::led_blink, &Turtlebot_instance);
-    ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);
+    ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);*/
     
+    //Initialize the class
     Turtlebot t;
+
     ros::spin();
     return 0;
     
