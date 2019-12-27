@@ -4,6 +4,7 @@
 #include <kobuki_msgs/ButtonEvent.h>
 #include <kobuki_msgs/SensorState.h>
 #include <kobuki_msgs/Led.h>
+#include <std_srvs/Trigger.h>
 
 class Turtlebot
 {
@@ -37,9 +38,10 @@ class Turtlebot
     }
 
     bool led_on_off = false;
+public:
 
-
-    void led_blink()
+    void led_blink(std_srvs::Trigger::Request &req,
+                   std_srvs::Trigger::Response &res)
     {
         if(led_on_off == false)
             led_on_off = true;
@@ -73,7 +75,9 @@ class Turtlebot
         
     }
 
-    void move_square(){
+    void move_square(std_srvs::Trigger::Request &req,
+                     std_srvs::Trigger::Response &res)
+        {
 	for (int i = 0; i < 4; i++)
 	{
 	    geometry_msgs::Twist cmd_vel_message;
@@ -103,17 +107,28 @@ class Turtlebot
 
 
     }
+    
+    void sing_song(std_srvs::Trigger::Request &req,
+                   std_srvs::Trigger::Response &res)
+        {
 
+    }
 }
 ;
 int main(int argc, char *argv[]){
-    std::cout << "Tryk på B0 for at køre i en firkant" << std::endl;
+    //std::cout << "Tryk på B0 for at køre i en firkant" << std::endl;
+    std::cout << "Use the buttons respectively to initiate the task" << std::endl;
 
     ros::init(argc, argv, "turtlebot");
+    ros::NodeHandle nh;
+    Turtlebot Turtlebot_instance;
 
+    ros::ServiceServer server_square = nh.advertiseService("square", &Turtlebot::move_square, &Turtlebot_instance);
+    ros::ServiceServer server_LED = nh.advertiseService("LED", &Turtlebot::led_blink, &Turtlebot_instance);
+    ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);
     
-
     Turtlebot t;
     ros::spin();
     return 0;
+    
 }
