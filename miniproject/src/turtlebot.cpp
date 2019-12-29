@@ -168,11 +168,15 @@ protected:
     };
     bool rotate = false;
     bool move = false;
+    bool start = false;
     ros::NodeHandle nh;
     ros::Subscriber sub = nh.subscribe("/odom", 1, &Classo::callback, this);
     ros::Publisher cmd_vel = nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10);
     geometry_msgs::PoseStamped presentPoint ,fromPoint;
 
+    void toggle(){
+        start = !start;
+    }
 
     double dist(geometry_msgs::PoseStamped p1, geometry_msgs::PoseStamped p2){
         return std::sqrt(
@@ -287,7 +291,7 @@ int main(int argc, char *argv[]){
     Turtlebot Turtlebot_instance;
     Classo Classo_instance;
 
-    ros::ServiceServer server_square = nh.advertiseService("square", &Classo::move_square, &Classo_instance);
+    ros::ServiceServer server_square = nh.advertiseService("square", &Classo::toggle, &Classo_instance);
     ros::ServiceServer server_LED = nh.advertiseService("LED", &Turtlebot::led_blink, &Turtlebot_instance);
     ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);
     
