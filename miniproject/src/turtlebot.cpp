@@ -62,7 +62,7 @@ class Turtlebot
 
 public:
 
-    bool led_blink(std_srvs::Trigger::Request &req,
+/*     bool led_blink(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res)
     {
 	std::cout << "led_blink()" << std::endl;
@@ -100,6 +100,44 @@ public:
         }
          
         
+    } */
+    bool blinking = false;
+    bool led_blink(std_srvs::Trigger::Request &req,
+                   std_srvs::Trigger::Response &res)
+    {
+        blinking = !blinking;
+    }
+
+    void blink(){
+
+    
+	std::cout << "led_blink()" << std::endl;
+
+        kobuki_msgs::Led msg1;
+        kobuki_msgs::Led msg2;
+	
+
+	//While loop for blinking
+        while (ros::ok && blinking)
+        {
+            msg1.value = msg1.ORANGE;
+            led1_pub.publish(msg1);
+            
+            msg2.value = msg2.RED;
+            led2_pub.publish(msg2);
+            ros::Duration(0.2).sleep();
+            
+            msg1.value = msg1.BLACK;
+            led1_pub.publish(msg1);
+
+            msg2.value = msg2.BLACK;
+            led2_pub.publish(msg2);
+            ros::Duration(0.2).sleep();
+            std::cout << "blinked" << std::endl;
+            ros::spinOnce();
+        }
+         
+        
     }
     
     bool sing_song(std_srvs::Trigger::Request &req,
@@ -122,6 +160,10 @@ public:
         playing = !playing;
     }
 	sleepok(3, n);
+    }
+    public:
+    Turtlebot(){
+        blink();
     }
 
 };
@@ -254,7 +296,9 @@ protected:
         moveSquare();
     }
     public:
-    Classo(){};
+    Classo(){
+
+    };
 };
 
 int main(int argc, char *argv[]){
@@ -268,9 +312,16 @@ int main(int argc, char *argv[]){
     ros::ServiceServer server_square = nh.advertiseService("square", &Classo::toggle, &classo_instance);
     ros::ServiceServer server_LED = nh.advertiseService("LED", &Turtlebot::led_blink, &Turtlebot_instance);
     ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);
+
+    ros::Rate loop_rate(20);
+    while (ros::ok)
+    {
+        Turtlebot_instance.blink();
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
     
-    //Initialize the class
-    Turtlebot t;
+
 
     ros::spin();
     return 0;
