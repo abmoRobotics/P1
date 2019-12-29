@@ -7,6 +7,10 @@
 //#include <std_srvs/Trigger.h>
 //#include <sound_play/sound_play.h>
 
+// Til Odometry:
+//#include <tf/transform_broadcaster.h>
+//#include <nav_msgs/Odometry.h>
+
 class Turtlebot
 {
     ros::NodeHandle n;
@@ -41,7 +45,7 @@ class Turtlebot
                     {
 
                         cmd_vel_message.linear.x = 0;
-                        cmd_vel_message.angular.z = 0.65; //Den her skal selv justeres sådan at det er en firkant, ikke stol på matematikken, det er fake news..
+                        cmd_vel_message.angular.z = 0.64; //Den her skal selv justeres sådan at det er en firkant, ikke stol på matematikken, det er fake news..
                         cmd_vel_pub.publish(cmd_vel_message);
                         t1 = ros::Time::now().toSec();
                     }
