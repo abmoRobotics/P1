@@ -132,7 +132,7 @@ public:
 		cmd_vel_pub.publish(cmd_vel_message);
 		t1 = ros::Time::now().toSec();
 	    }*/
-	}
+	//}
 
 
     }
