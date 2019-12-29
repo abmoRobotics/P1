@@ -4,21 +4,23 @@
 
 class menu
 { 
-public:
+private:
 //Service
-ros::NodeHandle n;
+ ros::NodeHandle n;
 
-ros::ServiceClient client_square = n.serviceClient<std_srvs::Trigger>("square");
-ros::ServiceClient client_LED = n.serviceClient<std_srvs::Trigger>("LED");
-ros::ServiceClient client_sing = n.serviceClient<std_srvs::Trigger>("sing");
+ ros::ServiceClient client_square = n.serviceClient<std_srvs::Trigger>("square");
+ ros::ServiceClient client_LED = n.serviceClient<std_srvs::Trigger>("LED");
+ ros::ServiceClient client_sing = n.serviceClient<std_srvs::Trigger>("sing");
 
 
-std_srvs::Trigger square;
-std_srvs::Trigger LED;
-std_srvs::Trigger sing;
+ std_srvs::Trigger square;
+ std_srvs::Trigger LED;
+ std_srvs::Trigger sing;
 
-void makeasquare()
-{
+public:
+
+ void makeasquare()
+ {
    if (client_square.call(square))
    {
        ROS_INFO("Task received");
@@ -28,11 +30,11 @@ void makeasquare()
        ROS_ERROR("Service was not called");
    }
           
-};
+ };
 
 
-void startLED()
-{
+ void startLED()
+ {
     if (client_LED.call(LED))
     {
         ROS_INFO("Task received");
@@ -42,10 +44,10 @@ void startLED()
         ROS_ERROR("Service was not called");
     }
  
-};
+ };
 
-void robotsing()
-{
+ void robotsing()
+ {
     if (client_sing.call(sing))
     {
        ROS_INFO("Task received"); 
@@ -59,8 +61,8 @@ void robotsing()
 
 
 
-void Menu()
-{
+  void Menu()
+ {
     int c=1;
 
     while(c !=0)
@@ -95,16 +97,18 @@ void Menu()
             break;
         }
     }
-}
-  menu()
+ }
+   menu()
   {
       Menu();
   }
 
 };
+
 int main(int argc, char *argv[])
 {
    ros::init(argc, argv, "interface");
-   menu();
+   menu M;
    ros::spin();
+   
 }
