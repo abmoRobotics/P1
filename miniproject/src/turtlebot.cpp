@@ -106,7 +106,7 @@ public:
                      std_srvs::Trigger::Response &res)
     {
         std::cout << "move_square()" << std::endl;
-        Classo c;
+        //Classo c;
 	/*for (int i = 0; i < 4; i++)
 	{
 	    geometry_msgs::Twist cmd_vel_message;
