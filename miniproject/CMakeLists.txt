@@ -125,6 +125,11 @@ set_target_properties(${PROJECT_NAME}_turtlebot PROPERTIES OUTPUT_NAME turtlebot
 target_link_libraries(${PROJECT_NAME}_turtlebot
 ${catkin_LIBRARIES}
 )
+add_executable(${PROJECT_NAME}_square src/square.cpp)
+set_target_properties(${PROJECT_NAME}_square PROPERTIES OUTPUT_NAME square PREFIX "")
+target_link_libraries(${PROJECT_NAME}_square
+${catkin_LIBRARIES}
+)
 
 add_executable(${PROJECT_NAME}_interface src/interface.cpp)
 set_target_properties(${PROJECT_NAME}_interface PROPERTIES OUTPUT_NAME interface PREFIX "")
