@@ -283,13 +283,12 @@ int main(int argc, char *argv[]){
 
     ros::init(argc, argv, "turtlebot");
     ros::NodeHandle nh;
-    //Turtlebot Turtlebot_instance;
+    Turtlebot Turtlebot_instance;
+    Classo Classo_instance;
 
-    //Jeg har kommenteret serviceserversne da de giver fejl lige nu :(((
-
-    /*ros::ServiceServer server_square = nh.advertiseService("square", &Turtlebot::move_square, &Turtlebot_instance);
+    ros::ServiceServer server_square = nh.advertiseService("square", &Classo::move_square, &Classo_instance);
     ros::ServiceServer server_LED = nh.advertiseService("LED", &Turtlebot::led_blink, &Turtlebot_instance);
-    ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);*/
+    ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);
     
     //Initialize the class
     Turtlebot t;
