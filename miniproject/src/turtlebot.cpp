@@ -102,12 +102,12 @@ public:
         
     }
 
-    void move_square(std_srvs::Trigger::Request &req,
+    /* void move_square(std_srvs::Trigger::Request &req,
                      std_srvs::Trigger::Response &res)
     {
         std::cout << "move_square()" << std::endl;
         Classo c;
-	/*for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 	{
 	    geometry_msgs::Twist cmd_vel_message;
 
@@ -132,10 +132,10 @@ public:
 		cmd_vel_pub.publish(cmd_vel_message);
 		t1 = ros::Time::now().toSec();
 	    }*/
-	//}
+	//}}
 
 
-    }
+
     
     bool sing_song(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res)
