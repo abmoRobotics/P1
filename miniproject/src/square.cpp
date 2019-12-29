@@ -30,7 +30,7 @@ protected:
             );
     }
 
-    double angCost(geometry_msgs::PoseStamped p1, double w, double z){
+    double angleCost(geometry_msgs::PoseStamped p1, double w, double z){
         double x1 =  std::abs(w-p1.pose.orientation.w);
         double x2 =  std::abs(z-p1.pose.orientation.z);
         return x1+x2;
@@ -65,7 +65,7 @@ protected:
         geometry_msgs::Twist t;
         if(rotate && move) move = false;
         if(rotate){
-            if (angCost(presPoint,w,z) < 0.05){
+            if (angleCost(presPoint,w,z) < 0.05){
                 fromPoint.pose.position.x = presPoint.pose.position.x;
                 fromPoint.pose.position.y = presPoint.pose.position.y;
                 corner++;
@@ -75,11 +75,11 @@ protected:
                 t.angular.z = 0.4;
             }
         }else if(move){
-            if(dist(presPoint,fromPoint) < 1){
-                t.linear.x = 0.4;
-            }else{
+            if(dist(presPoint,fromPoint) > 1){
                 move = false;
                 rotate = true;
+            }else{
+                t.linear.x = 0.4;
             }
         }else{
             rotate = true;
