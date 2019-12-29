@@ -62,7 +62,7 @@ class Turtlebot
 
 public:
 
-    void led_blink(std_srvs::Trigger::Request &req,
+    bool led_blink(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res)
     {
 	std::cout << "led_blink()" << std::endl;
@@ -137,7 +137,7 @@ public:
 
     }
     
-    void sing_song(std_srvs::Trigger::Request &req,
+    bool sing_song(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res)
     {
 	std::cout << "sing_song()" << std::endl;
@@ -159,7 +159,8 @@ public:
 class Classo{
 public:
     Classo(){};
-    void toggle(){
+    bool toggle(std_srvs::Trigger::Request &req,
+                std_srvs::Trigger::Response &res){
         start = !start;
     }
 protected:
