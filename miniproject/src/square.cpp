@@ -20,7 +20,7 @@ protected:
     ros::NodeHandle nh;
     ros::Subscriber sub = nh.subscribe("/odom", 1, &Classo::callback, this);
     ros::Publisher cmd_vel = nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10);
-    geometry_msgs::PoseStamped presPoint ,fromPoint;
+    geometry_msgs::PoseStamped presentPoint ,fromPoint;
 
 
     double dist(geometry_msgs::PoseStamped p1, geometry_msgs::PoseStamped p2){
@@ -66,8 +66,8 @@ protected:
         if(rotate && move) move = false;
         if(rotate){
             if (angleCost(presPoint,w,z) < 0.05){
-                fromPoint.pose.position.x = presPoint.pose.position.x;
-                fromPoint.pose.position.y = presPoint.pose.position.y;
+                fromPoint.pose.position.x = presentPoint.pose.position.x;
+                fromPoint.pose.position.y = presentPoint.pose.position.y;
                 corner++;
                 rotate = false;
                 move = true;
@@ -75,7 +75,7 @@ protected:
                 t.angular.z = 0.4;
             }
         }else if(move){
-            if(dist(presPoint,fromPoint) > 1){
+            if(dist(presentPoint,fromPoint) > 1){
                 move = false;
                 rotate = true;
             }else{
@@ -112,17 +112,17 @@ protected:
     }
 
     void callback(const nav_msgs::Odometry::ConstPtr &message){
-        presPoint.pose.orientation.z = message->pose.pose.orientation.z;
-        presPoint.pose.orientation.w = message->pose.pose.orientation.w;
+        presentPoint.pose.orientation.z = message->pose.pose.orientation.z;
+        presentPoint.pose.orientation.w = message->pose.pose.orientation.w;
 
-        presPoint.pose.position.x = message->pose.pose.position.x;
-        presPoint.pose.position.y = message->pose.pose.position.y; 
+        presentPoint.pose.position.x = message->pose.pose.position.x;
+        presentPoint.pose.position.y = message->pose.pose.position.y; 
         std::cout << "callback received"<<
-        " z: " << presPoint.pose.orientation.z <<
-        " w: " << presPoint.pose.orientation.w <<
-        " x: " << presPoint.pose.orientation.x <<
-        " y: " << presPoint.pose.orientation.y <<
-        " distance: " << dist(presPoint,fromPoint) <<
+        " z: " << presentPoint.pose.orientation.z <<
+        " w: " << presentPoint.pose.orientation.w <<
+        " x: " << presentPoint.pose.orientation.x <<
+        " y: " << presentPoint.pose.orientation.y <<
+        " distance: " << dist(presentPoint,fromPoint) <<
         std::endl;
         moveSquare();
     }
