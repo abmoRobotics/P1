@@ -62,7 +62,7 @@ class Turtlebot
 
 public:
 
-    bool led_blink(std_srvs::Trigger::Request &req,
+/*     bool led_blink(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res)
     {
 	std::cout << "led_blink()" << std::endl;
@@ -84,6 +84,46 @@ public:
             msg1.value = msg1.ORANGE;
             led1_pub.publish(msg1);
 
+            msg2.value = msg2.RED;
+            led2_pub.publish(msg2);
+            ros::Duration(0.2).sleep();
+            
+            msg1.value = msg1.BLACK;
+            led1_pub.publish(msg1);
+
+            msg2.value = msg2.BLACK;
+            led2_pub.publish(msg2);
+            ros::Duration(0.2).sleep();
+            
+            ros::spinOnce();
+            loop_rate.sleep(); 
+        }
+         
+        
+    } */
+    bool blinking = false;
+    bool led_blink(std_srvs::Trigger::Request &req,
+                   std_srvs::Trigger::Response &res)
+    {
+        blinking = !blinking;
+    }
+
+    void blink(){
+
+    
+	std::cout << "led_blink()" << std::endl;
+
+        kobuki_msgs::Led msg1;
+        kobuki_msgs::Led msg2;
+	
+        ros::Rate loop_rate(20);
+
+	//While loop for blinking
+        while (ros::ok && blinking)
+        {
+            msg1.value = msg1.ORANGE;
+            led1_pub.publish(msg1);
+            
             msg2.value = msg2.RED;
             led2_pub.publish(msg2);
             ros::Duration(0.2).sleep();
@@ -122,6 +162,10 @@ public:
         playing = !playing;
     }
 	sleepok(3, n);
+    }
+    public:
+    Turtlebot(){
+        blink();
     }
 
 };
