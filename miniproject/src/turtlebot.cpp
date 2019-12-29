@@ -267,6 +267,7 @@ protected:
     }
 
     void callback(const nav_msgs::Odometry::ConstPtr &message){
+        if(!start)return;
         presentPoint.pose.orientation.z = message->pose.pose.orientation.z;
         presentPoint.pose.orientation.w = message->pose.pose.orientation.w;
 
