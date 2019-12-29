@@ -46,16 +46,16 @@ protected:
             w = 0.0;
             break;
         case CORNER_1:
-            z =  0.7;
-            w = -0.7;
+            z =  0.7071;
+            w = -0.7071;
             break;
         case CORNER_2:
             z =  0.0;
             w = -1.0;
             break;
         case CORNER_3:
-            z = -0.7;
-            w = -0.7;
+            z = -0.7071;
+            w = -0.7071;
             break;
         default:
             corner = CORNER_0;
