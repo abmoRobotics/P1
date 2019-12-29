@@ -177,9 +177,6 @@ protected:
     ros::Publisher cmd_vel = nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10);
     geometry_msgs::PoseStamped presentPoint ,fromPoint;
 
-    void toggle(){
-        start = !start;
-    }
 
     double dist(geometry_msgs::PoseStamped p1, geometry_msgs::PoseStamped p2){
         return std::sqrt(
