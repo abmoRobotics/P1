@@ -62,7 +62,7 @@ class Turtlebot
 
 public:
 
-    void led_blink(std_srvs::Trigger::Request &req,
+    bool led_blink(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res)
     {
 	std::cout << "led_blink()" << std::endl;
@@ -106,7 +106,7 @@ public:
                      std_srvs::Trigger::Response &res)
     {
         std::cout << "move_square()" << std::endl;
-        Classo c;
+    //Classo c;
 	/*for (int i = 0; i < 4; i++)
 	{
 	    geometry_msgs::Twist cmd_vel_message;
@@ -137,7 +137,7 @@ public:
 
     }
     
-    void sing_song(std_srvs::Trigger::Request &req,
+    bool sing_song(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res)
     {
 	std::cout << "sing_song()" << std::endl;
@@ -158,9 +158,11 @@ public:
 
 class Classo{
 public:
-    Classo(){};
-    void toggle(){
+    
+    bool toggle(std_srvs::Trigger::Request &req,
+                std_srvs::Trigger::Response &res){
         start = !start;
+        return 1;
     }
 protected:
     enum{
@@ -282,6 +284,8 @@ protected:
         std::endl;
         moveSquare();
     }
+    public:
+    Classo(){};
 };
 
 int main(int argc, char *argv[]){
@@ -290,9 +294,9 @@ int main(int argc, char *argv[]){
     ros::init(argc, argv, "turtlebot");
     ros::NodeHandle nh;
     Turtlebot Turtlebot_instance;
-    Classo Classo_instance;
+    Classo classo_instance;
 
-    ros::ServiceServer server_square = nh.advertiseService("square", &Classo::toggle, &Classo_instance);
+    ros::ServiceServer server_square = nh.advertiseService("square", &Classo::toggle, &classo_instance);
     ros::ServiceServer server_LED = nh.advertiseService("LED", &Turtlebot::led_blink, &Turtlebot_instance);
     ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);
     
