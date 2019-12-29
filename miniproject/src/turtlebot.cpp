@@ -116,7 +116,6 @@ public:
         kobuki_msgs::Led msg1;
         kobuki_msgs::Led msg2;
 	
-        ros::Rate loop_rate(20);
 
 	//While loop for blinking
         while (ros::ok && blinking)
@@ -134,9 +133,8 @@ public:
             msg2.value = msg2.BLACK;
             led2_pub.publish(msg2);
             ros::Duration(0.2).sleep();
-            
+            std::cout << "blinked" << std::endl;
             ros::spinOnce();
-            loop_rate.sleep(); 
         }
          
         
@@ -298,7 +296,9 @@ protected:
         moveSquare();
     }
     public:
-    Classo(){};
+    Classo(){
+
+    };
 };
 
 int main(int argc, char *argv[]){
@@ -312,9 +312,16 @@ int main(int argc, char *argv[]){
     ros::ServiceServer server_square = nh.advertiseService("square", &Classo::toggle, &classo_instance);
     ros::ServiceServer server_LED = nh.advertiseService("LED", &Turtlebot::led_blink, &Turtlebot_instance);
     ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);
+
+    ros::Rate loop_rate(20);
+    while (ros::ok)
+    {
+        Turtlebot_instance.blink();
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
     
-    //Initialize the class
-    Turtlebot t;
+
 
     ros::spin();
     return 0;
