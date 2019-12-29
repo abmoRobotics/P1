@@ -159,6 +159,9 @@ public:
 class Classo{
 public:
     Classo(){};
+    void toggle(){
+        start = !start;
+    }
 protected:
     enum{
         CORNER_0 = 0,
