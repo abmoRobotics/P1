@@ -65,7 +65,7 @@ protected:
         geometry_msgs::Twist t;
         if(rotate && move) move = false;
         if(rotate){
-            if (angleCost(presPoint,w,z) < 0.05){
+            if (angleCost(presentPoint,w,z) < 0.05){
                 fromPoint.pose.position.x = presentPoint.pose.position.x;
                 fromPoint.pose.position.y = presentPoint.pose.position.y;
                 corner++;
