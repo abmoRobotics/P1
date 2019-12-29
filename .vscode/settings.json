@@ -57,8 +57,6 @@
         "cinttypes": "cpp",
         "utility": "cpp",
         "typeindex": "cpp",
-        "typeinfo": "cpp",
-        "random": "cpp"
-    },
-    "ros.distro": "kinetic"
+        "typeinfo": "cpp"
+    }
 }

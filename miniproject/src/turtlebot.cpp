@@ -271,7 +271,6 @@ protected:
             loop_rate.sleep();
         }
         t.angular.z = 0;
-
         t.linear.x = 0.2;
         while(ros::ok() && dist(presPoint,fromPoint) < 3){
             cmd_vel.publish(t);
