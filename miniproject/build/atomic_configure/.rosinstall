@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/ros/p1_ws/src/miniproject/devel/setup.sh
