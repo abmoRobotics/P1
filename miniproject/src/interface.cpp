@@ -33,7 +33,7 @@ void makeasquare()
 
 void startLED()
 {
-    if (client_square.call(LED))
+    if (client_LED.call(LED))
     {
         ROS_INFO("Task received");
     }
@@ -46,7 +46,7 @@ void startLED()
 
 void robotsing()
 {
-    if (client_square.call(sing))
+    if (client_sing.call(sing))
     {
        ROS_INFO("Task received"); 
     }
