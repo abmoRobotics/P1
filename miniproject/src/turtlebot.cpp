@@ -102,7 +102,7 @@ public:
         
     }
     
-    void sing_song(std_srvs::Trigger::Request &req,
+    bool sing_song(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res){
     static bool playing = false;
 	std::cout <<"singsongong" << std::endl;
