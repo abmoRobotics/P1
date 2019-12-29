@@ -165,7 +165,7 @@ public:
 
 };
 
-class Classo{
+class Square{
 public:
     
     bool toggle(std_srvs::Trigger::Request &req,
@@ -184,7 +184,7 @@ protected:
     bool move = false;
     bool start = false;
     ros::NodeHandle nh;
-    ros::Subscriber sub = nh.subscribe("/odom", 1, &Classo::callback, this);
+    ros::Subscriber sub = nh.subscribe("/odom", 1, &Square::callback, this);
     ros::Publisher cmd_vel = nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10);
     geometry_msgs::PoseStamped presentPoint ,fromPoint;
 
@@ -293,20 +293,18 @@ protected:
         moveSquare();
     }
     public:
-    Classo(){
+    Square(){
 
     };
 };
 
 int main(int argc, char *argv[]){
-    std::cout << "Use the buttons respectively to initiate the task" << std::endl;
-
     ros::init(argc, argv, "turtlebot");
     ros::NodeHandle nh;
     Turtlebot Turtlebot_instance;
-    Classo classo_instance;
+    Square Square_instance;
 
-    ros::ServiceServer server_square = nh.advertiseService("square", &Classo::toggle, &classo_instance);
+    ros::ServiceServer server_square = nh.advertiseService("square", &Square::toggle, &Square_instance);
     ros::ServiceServer server_LED = nh.advertiseService("LED", &Turtlebot::led_blink, &Turtlebot_instance);
     ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);
 
