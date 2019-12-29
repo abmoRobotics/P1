@@ -110,9 +110,6 @@ public:
 
     void blink(){
 
-    
-	std::cout << "led_blink()" << std::endl;
-
         kobuki_msgs::Led msg1;
         kobuki_msgs::Led msg2;
 	
