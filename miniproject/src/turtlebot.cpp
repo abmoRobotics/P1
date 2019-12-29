@@ -101,56 +101,26 @@ public:
          
         
     }
-
-    void move_square(std_srvs::Trigger::Request &req,
-                     std_srvs::Trigger::Response &res)
-    {
-        std::cout << "move_square()" << std::endl;
-    //Classo c;
-	/*for (int i = 0; i < 4; i++)
-	{
-	    geometry_msgs::Twist cmd_vel_message;
-
-	    double t0 = ros::Time::now().toSec();
-	    double t1 = 0;
-	    while ((t1 - t0) < 3)
-	    {
-
-		cmd_vel_message.linear.x = 0.3;
-		cmd_vel_message.angular.z = 0;
-		cmd_vel_pub.publish(cmd_vel_message);
-		t1 = ros::Time::now().toSec();
-	    }
-
-	    t0 = ros::Time::now().toSec();
-	    t1 = 0;
-	    while ((t1 - t0) < 3)
-	    {
-
-		cmd_vel_message.linear.x = 0;
-		cmd_vel_message.angular.z = 0.64; //Den her skal selv justeres sådan at det er en firkant, ikke stol på matematikken, det er fake news..
-		cmd_vel_pub.publish(cmd_vel_message);
-		t1 = ros::Time::now().toSec();
-	    }*/
-	//}
-
-
-    }
     
-    bool sing_song(std_srvs::Trigger::Request &req,
-                   std_srvs::Trigger::Response &res)
-    {
-	std::cout << "sing_song()" << std::endl;
-    }
-
-    void sing_song(){
+    void sing_song(std_srvs::Trigger::Request &req,
+                   std_srvs::Trigger::Response &res){
+    static bool playing = false;
 	std::cout <<"singsongong" << std::endl;
 	sleepok(1, n);
 	//The path to the sound file
 	const char *str = "/home/ros/megalovania.ogg";
 	//Star the music
-	sc.startWave(str);
-	ROS_INFO("Playing music");
+    if(!playing){
+        sc.startWave(str);
+        ROS_INFO("Playing music");
+        playing = !playing;
+    }
+    //Stop the music
+    else if(playing){
+        sc.stopWave(str);
+        ROS_INFO("Stopped music");
+        playing = !playing;
+    }
 	sleepok(3, n);
     }
 
