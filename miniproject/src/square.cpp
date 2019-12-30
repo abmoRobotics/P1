@@ -20,7 +20,7 @@ protected:
     ros::NodeHandle nh;
     ros::Subscriber sub = nh.subscribe("/odom", 1, &Classo::callback, this);
     ros::Publisher cmd_vel = nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10);
-    geometry_msgs::PoseStamped presPoint ,fromPoint;
+    geometry_msgs::PoseStamped presentPoint ,fromPoint;
 
 
     double dist(geometry_msgs::PoseStamped p1, geometry_msgs::PoseStamped p2){
@@ -30,7 +30,7 @@ protected:
             );
     }
 
-    double angCost(geometry_msgs::PoseStamped p1, double w, double z){
+    double angleCost(geometry_msgs::PoseStamped p1, double w, double z){
         double x1 =  std::abs(w-p1.pose.orientation.w);
         double x2 =  std::abs(z-p1.pose.orientation.z);
         return x1+x2;
@@ -46,16 +46,16 @@ protected:
             w = 0.0;
             break;
         case CORNER_1:
-            z =  0.7;
-            w = -0.7;
+            z =  0.7071;
+            w = -0.7071;
             break;
         case CORNER_2:
             z =  0.0;
             w = -1.0;
             break;
         case CORNER_3:
-            z = -0.7;
-            w = -0.7;
+            z = -0.7071;
+            w = -0.7071;
             break;
         default:
             corner = CORNER_0;
@@ -65,9 +65,9 @@ protected:
         geometry_msgs::Twist t;
         if(rotate && move) move = false;
         if(rotate){
-            if (angCost(presPoint,w,z) < 0.05){
-                fromPoint.pose.position.x = presPoint.pose.position.x;
-                fromPoint.pose.position.y = presPoint.pose.position.y;
+            if (angleCost(presentPoint,w,z) < 0.05){
+                fromPoint.pose.position.x = presentPoint.pose.position.x;
+                fromPoint.pose.position.y = presentPoint.pose.position.y;
                 corner++;
                 rotate = false;
                 move = true;
@@ -75,11 +75,11 @@ protected:
                 t.angular.z = 0.4;
             }
         }else if(move){
-            if(dist(presPoint,fromPoint) < 1){
-                t.linear.x = 0.4;
-            }else{
+            if(dist(presentPoint,fromPoint) > 1){
                 move = false;
                 rotate = true;
+            }else{
+                t.linear.x = 0.4;
             }
         }else{
             rotate = true;
@@ -112,17 +112,17 @@ protected:
     }
 
     void callback(const nav_msgs::Odometry::ConstPtr &message){
-        presPoint.pose.orientation.z = message->pose.pose.orientation.z;
-        presPoint.pose.orientation.w = message->pose.pose.orientation.w;
+        presentPoint.pose.orientation.z = message->pose.pose.orientation.z;
+        presentPoint.pose.orientation.w = message->pose.pose.orientation.w;
 
-        presPoint.pose.position.x = message->pose.pose.position.x;
-        presPoint.pose.position.y = message->pose.pose.position.y; 
+        presentPoint.pose.position.x = message->pose.pose.position.x;
+        presentPoint.pose.position.y = message->pose.pose.position.y; 
         std::cout << "callback received"<<
-        " z: " << presPoint.pose.orientation.z <<
-        " w: " << presPoint.pose.orientation.w <<
-        " x: " << presPoint.pose.orientation.x <<
-        " y: " << presPoint.pose.orientation.y <<
-        " distance: " << dist(presPoint,fromPoint) <<
+        " z: " << presentPoint.pose.orientation.z <<
+        " w: " << presentPoint.pose.orientation.w <<
+        " x: " << presentPoint.pose.orientation.x <<
+        " y: " << presentPoint.pose.orientation.y <<
+        " distance: " << dist(presentPoint,fromPoint) <<
         std::endl;
         moveSquare();
     }
