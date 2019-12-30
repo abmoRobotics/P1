@@ -51,25 +51,6 @@ class Move{
         xPoint.header.stamp = ros::Time::now();
     }
 
-    bool returnPoint42(std_srvs::Empty::Request &req,
-                    std_srvs::Empty::Response &res)
-    {
-        geometry_msgs::PointStamped p;
-        //listener.transformPoint("map",xPoint,p);
-        std::cout << "returning to point 42." << std::endl;
-        geometry_msgs::PoseStamped msg;
-        msg.header.stamp = ros::Time();
-        std::string frame = "odom";
-        msg.header.frame_id = frame.c_str();
-        msg.pose.position = p.point;
-        msg.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
-        std::cout << "Moving to: x: " << xPoint.point.x << " " << p.point.x << 
-        " y: " << xPoint.point.y << " " << p.point.y <<std::endl;
-        pub.publish(msg);
-        
-    }
-
-
     bool returnPoint(std_srvs::Empty::Request &req,
                     std_srvs::Empty::Response &res)
     {
