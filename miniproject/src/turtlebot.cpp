@@ -19,36 +19,9 @@ class Turtlebot
     ros::Publisher cmd_vel_pub = n.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
     ros::Publisher led1_pub = n.advertise<kobuki_msgs::Led>("mobile_base/commands/led1", 1000);
     ros::Publisher led2_pub = n.advertise<kobuki_msgs::Led>("mobile_base/commands/led2", 1000);
-    //Subscribers
-    ros::Subscriber sub = n.subscribe("/mobile_base/events/button", 1000, &Turtlebot::_button_event,this);
     //SoundClient
     sound_play::SoundClient sc; 
 
-    //Button Event Function
-    void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
-    {
-        //When a button is pressed
-        if (msg->state == msg->PRESSED)
-        {
-	    //Check which button
-            if (msg->button == msg->Button0)
-            {
-                std::cout << "B0 has been pressed" << std::endl;
-		//move_square();
-            }
-            if (msg->button == msg->Button1)
-            {
-                std::cout << "B1 has been pressed" << std::endl;
-                //led_blink();
-            }
-
-            if (msg->button == msg->Button2)
-            {
-                std::cout << "B2 has been pressed" << std::endl;
-		//sing_song();
-            }
-        }
-    }
 
     //Function that sleeps. Used when playing sound
     void sleepok(int t, ros::NodeHandle &n) 
@@ -62,28 +35,25 @@ class Turtlebot
 
 public:
 
+    bool blinking = false;
     bool led_blink(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res)
     {
-	std::cout << "led_blink()" << std::endl;
-       //Swaps the value of "led_on_off" between true and false
-        if(led_on_off == false)
-            led_on_off = true;
-        else if(led_on_off == true)
-            led_on_off = false;
+        blinking = !blinking;
+    }
 
+    void blink(){
 
         kobuki_msgs::Led msg1;
         kobuki_msgs::Led msg2;
 	
-        ros::Rate loop_rate(20);
 
 	//While loop for blinking
-        while (led_on_off)
+        while (ros::ok && blinking)
         {
             msg1.value = msg1.ORANGE;
             led1_pub.publish(msg1);
-
+            
             msg2.value = msg2.RED;
             led2_pub.publish(msg2);
             ros::Duration(0.2).sleep();
@@ -94,9 +64,8 @@ public:
             msg2.value = msg2.BLACK;
             led2_pub.publish(msg2);
             ros::Duration(0.2).sleep();
-            
+            std::cout << "blinked" << std::endl;
             ros::spinOnce();
-            loop_rate.sleep(); 
         }
          
         
@@ -123,10 +92,14 @@ public:
     }
 	sleepok(3, n);
     }
+    public:
+    Turtlebot(){
+        blink();
+    }
 
 };
 
-class Classo{
+class Square{
 public:
     
     bool toggle(std_srvs::Trigger::Request &req,
@@ -145,7 +118,7 @@ protected:
     bool move = false;
     bool start = false;
     ros::NodeHandle nh;
-    ros::Subscriber sub = nh.subscribe("/odom", 1, &Classo::callback, this);
+    ros::Subscriber sub = nh.subscribe("/odom", 1, &Square::callback, this);
     ros::Publisher cmd_vel = nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10);
     geometry_msgs::PoseStamped presentPoint ,fromPoint;
 
@@ -212,29 +185,6 @@ protected:
             rotate = true;
         }
         cmd_vel.publish(t);
-
-
-/* 
-         t.angular.z = 0.2;
-        ros::Rate loop_rate(100);
-        while(ros::ok() && angCost(presPoint,w,z) < 0.1){
-            std::cout 
-            << "Ang cost: " << angCost(presPoint,w,z) 
-            << " z: " << presPoint.pose.orientation.z
-            << " w: " << presPoint.pose.orientation.w 
-            << std::endl;
-            cmd_vel.publish(t);
-            loop_rate.sleep();
-        }
-        t.angular.z = 0;
-        t.linear.x = 0.2;
-        while(ros::ok() && dist(presPoint,fromPoint) < 3){
-            cmd_vel.publish(t);
-            loop_rate.sleep();
-        } */
-
-        //corner++; 
-        //moveSquare(corner);
     }
 
     void callback(const nav_msgs::Odometry::ConstPtr &message){
@@ -254,23 +204,30 @@ protected:
         moveSquare();
     }
     public:
-    Classo(){};
+    Square(){
+
+    };
 };
 
 int main(int argc, char *argv[]){
-    std::cout << "Use the buttons respectively to initiate the task" << std::endl;
-
     ros::init(argc, argv, "turtlebot");
     ros::NodeHandle nh;
     Turtlebot Turtlebot_instance;
-    Classo classo_instance;
+    Square Square_instance;
 
-    ros::ServiceServer server_square = nh.advertiseService("square", &Classo::toggle, &classo_instance);
+    ros::ServiceServer server_square = nh.advertiseService("square", &Square::toggle, &Square_instance);
     ros::ServiceServer server_LED = nh.advertiseService("LED", &Turtlebot::led_blink, &Turtlebot_instance);
     ros::ServiceServer server_sing = nh.advertiseService("sing", &Turtlebot::sing_song, &Turtlebot_instance);
+
+    ros::Rate loop_rate(20);
+    while (ros::ok)
+    {
+        Turtlebot_instance.blink();
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
     
-    //Initialize the class
-    Turtlebot t;
+
 
     ros::spin();
     return 0;
