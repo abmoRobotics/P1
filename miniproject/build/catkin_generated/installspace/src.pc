@@ -1,8 +1,0 @@
-prefix=/home/ros/p1_ws/src/miniproject/install
-
-Name: src
-Description: Description of src
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/ros/p1_ws/src/miniproject/install/lib 
-Requires: 

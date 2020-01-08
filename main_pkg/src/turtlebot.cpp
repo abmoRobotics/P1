@@ -603,9 +603,11 @@ public:
         debug("Moving to the kitchen");
         //Get point
         _client_receive_pose_kitchen.call(_srv_receive_pose_kitchen);
+        
 
         main_pkg::pointStamped_srv::Response kitchenPoint = _srv_receive_pose_kitchen.response;
-
+        std::cout << kitchenPoint << std::endl;
+        std::cout << _srv_receive_pose_kitchen.response.pose.point << std::endl;
         //Check if pose_kitchen has been set (if not origo)
         if (kitchenPoint.pose.point.x != 0 || kitchenPoint.pose.point.y != 0 || kitchenPoint.pose.point.z != 0)
         {

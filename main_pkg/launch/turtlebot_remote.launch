@@ -1,3 +1,0 @@
-<launch>
-    <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(find busroute)/config/busrouting.rviz"/>
-</launch>
