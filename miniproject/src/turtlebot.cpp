@@ -22,7 +22,6 @@ class Turtlebot
     //SoundClient
     sound_play::SoundClient sc; 
 
-<<<<<<< HEAD
     //Button Event Function
     void _button_event(const kobuki_msgs::ButtonEvent::ConstPtr &msg)
     {
@@ -49,15 +48,6 @@ class Turtlebot
         }
     }
 };
-=======
->>>>>>> b1bc23dea8af615764eb47fa593e42d3c408d31f
-
-    //Function that sleeps. Used when playing sound
-    void sleepok(int t, ros::NodeHandle &n) 
-    {
-	if (n.ok()) //Sleep for t seconds
-	sleep(t);
-    }
 
     //Turns the led's on or off
     bool led_on_off = false;
@@ -103,23 +93,20 @@ public:
     bool sing_song(std_srvs::Trigger::Request &req,
                    std_srvs::Trigger::Response &res){
     static bool playing = false;
-	std::cout <<"singsongong" << std::endl;
-	sleepok(1, n);
-	//The path to the sound file
-	const char *str = "/home/ros/megalovania.ogg";
-	//Star the music
+	std::cout <<"Sing song" << std::endl;
+	//Start the music
     if(!playing){
-        sc.startWave(str);
+        sc.startWaveFromPkg("miniproject", "sound/megalovania.ogg");
         ROS_INFO("Playing music");
         playing = !playing;
     }
     //Stop the music
     else if(playing){
-        sc.stopWave(str);
+        sc.stopWaveFromPkg("miniproject", "sound/megalovania.ogg");
         ROS_INFO("Stopped music");
         playing = !playing;
     }
-	sleepok(3, n);
+	//sleepok(3, n);
     }
     public:
     Turtlebot(){
@@ -161,7 +148,9 @@ protected:
 
     double angleCost(geometry_msgs::PoseStamped p1, double w, double z){
         double x1 =  std::abs(w-p1.pose.orientation.w);
+        std::cout << "w: " << w << "p1w: " << p1.pose.orientation.w << std::endl;
         double x2 =  std::abs(z-p1.pose.orientation.z);
+        std::cout << "z: " << z << "p1z: " << p1.pose.orientation.z << std::endl;
         return x1+x2;
     }
     
@@ -175,16 +164,16 @@ protected:
             w = 0.0;
             break;
         case CORNER_1:
-            z =  0.7071;
-            w = -0.7071;
+            z =  -0.7071;
+            w = 0.7071;
             break;
         case CORNER_2:
             z =  0.0;
-            w = -1.0;
+            w = 1.0;
             break;
         case CORNER_3:
-            z = -0.7071;
-            w = -0.7071;
+            z = 0.7071;
+            w = 0.7071;
             break;
         default:
             corner = CORNER_0;
@@ -202,6 +191,7 @@ protected:
                 move = true;
             }else{
                 t.angular.z = 0.4;
+                std::cout << angleCost(presentPoint, w, z) << std::endl;
             }
         }else if(move){
             if(dist(presentPoint,fromPoint) > 1){
